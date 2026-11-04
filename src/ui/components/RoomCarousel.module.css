@@ -140,14 +140,95 @@
   }
 }
 
-@media (max-width: 640px) {
+/* Vertical mode: one room at a time, sliding up. Keep in sync with VERTICAL_QUERY in the component. */
+@media (max-width: 820px), (max-height: 600px) {
   .section {
-    --visible: 1.15;
-    --gap: 16px;
+    /* Bigger than the viewport's vertical padding, so the next card never peeks in. */
+    --gap: 64px;
+    --shadow-room: 24px;
+    /* Fill the width, but never get taller than what is left of the screen below the header. */
+    --slide-height: clamp(
+      300px,
+      min((100vw - 2 * var(--page-gutter)) * 1.25, 100svh - var(--navbar-height) - 260px),
+      720px
+    );
+    /* Wider than tall, but not edge to edge on wide and short (zoomed-in) screens. */
+    --card-width: min(100vw - 2 * var(--page-gutter), var(--slide-height) * 1.5);
 
     padding-block: 40px 56px;
   }
 
+  .header,
+  .progress {
+    max-width: var(--card-width);
+    margin-inline: auto;
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .viewport {
+    height: calc(var(--slide-height) + 2 * var(--shadow-room));
+    padding-block: var(--shadow-room);
+    margin-block: calc(-1 * var(--shadow-room));
+  }
+
+  .track {
+    flex-direction: column;
+  }
+
+  .slide {
+    flex: 0 0 var(--slide-height);
+    align-self: center;
+    width: min(100%, var(--card-width));
+  }
+
+  /* Only one card is visible, so it should not wait for a staggered entrance. */
+  .slide:nth-child(n) {
+    animation-delay: 0s;
+  }
+
+  .slide > :first-child {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .progress {
+    margin-top: 24px;
+  }
+}
+
+/* Short screens (zoomed-in desktop, landscape phones): drop the heading to give the card room. */
+@media (max-height: 600px) {
+  .section {
+    --slide-height: clamp(240px, 100svh - var(--navbar-height) - 140px, 720px);
+
+    padding-block: 24px;
+  }
+
+  .header {
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+
+  /* Visually hidden, but still announced by screen readers. */
+  .header > div:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 640px) {
   .controls {
     display: none;
   }

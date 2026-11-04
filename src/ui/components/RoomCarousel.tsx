@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type TransitionEvent } from 'react';
 import type { RoomPreview } from '../../scenes/rooms';
 import { rotate } from '../../utils/array';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
 import { RoomCard } from './RoomCard';
 import styles from './RoomCarousel.module.css';
@@ -9,7 +10,24 @@ import styles from './RoomCarousel.module.css';
 const AUTO_ADVANCE_MS = 4500;
 
 /**
- * Infinite carousel: slides one card to the left, then moves the first room to the end
+ * Narrow or short viewports (phones, zoomed-in desktop) show one room at a time and slide
+ * vertically. Keep in sync with the vertical-mode media query in the CSS module.
+ */
+const VERTICAL_QUERY = '(max-width: 820px), (max-height: 600px)';
+
+/** Distance between the starts of two neighbouring slides along the sliding axis. */
+function measureStep(track: HTMLElement | null, vertical: boolean): number {
+  const first = track?.firstElementChild;
+  if (!track || !first) return 0;
+  const style = getComputedStyle(track);
+  const rect = first.getBoundingClientRect();
+  return vertical
+    ? rect.height + (parseFloat(style.rowGap) || 0)
+    : rect.width + (parseFloat(style.columnGap) || 0);
+}
+
+/**
+ * Infinite carousel: slides one card to the left (or up in vertical mode), then moves the first room to the end
  * of the list and resets the offset without a transition, so the loop is seamless.
  */
 export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
@@ -20,18 +38,11 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
   const trackRef = useRef<HTMLUListElement>(null);
   const busyRef = useRef(false);
   const reducedMotion = usePrefersReducedMotion();
-
-  const measureStep = () => {
-    const track = trackRef.current;
-    const first = track?.firstElementChild;
-    if (!track || !first) return 0;
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-    return first.getBoundingClientRect().width + gap;
-  };
+  const vertical = useMediaQuery(VERTICAL_QUERY);
 
   const next = useCallback(() => {
     if (busyRef.current) return;
-    const step = measureStep();
+    const step = measureStep(trackRef.current, vertical);
     if (reducedMotion || step <= 0) {
       setOrder((current) => rotate(current, 1));
       return;
@@ -39,11 +50,11 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
     busyRef.current = true;
     setAnimated(true);
     setOffset(-step);
-  }, [reducedMotion]);
+  }, [reducedMotion, vertical]);
 
   const previous = () => {
     if (busyRef.current) return;
-    const step = measureStep();
+    const step = measureStep(trackRef.current, vertical);
     setOrder((current) => rotate(current, -1));
     if (reducedMotion || step <= 0) return;
     // Place the new first card off-screen, then animate it in on the next frame.
@@ -86,33 +97,32 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
           <p className={styles.eyebrow}>Pokoje z widokiem</p>
           <h1 className={styles.heading}>Wybierz swoje okno</h1>
         </div>
-        <div className={styles.controls}>
+        {/* Hovering the arrows holds the current room; the timer runs again on leave. */}
+        <div
+          className={styles.controls}
+          onPointerEnter={() => setPaused(true)}
+          onPointerLeave={() => setPaused(false)}
+        >
           <button
             type="button"
             className={styles.arrow}
             onClick={previous}
             aria-label="Poprzedni pokój"
           >
-            <ArrowIcon direction="left" />
+            <ArrowIcon direction={vertical ? 'up' : 'left'} />
           </button>
           <button type="button" className={styles.arrow} onClick={next} aria-label="Następny pokój">
-            <ArrowIcon direction="right" />
+            <ArrowIcon direction={vertical ? 'down' : 'right'} />
           </button>
         </div>
       </div>
 
-      <div
-        className={styles.viewport}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
-      >
+      <div className={styles.viewport}>
         <ul
           ref={trackRef}
           className={styles.track}
           style={{
-            transform: `translateX(${offset}px)`,
+            transform: vertical ? `translateY(${offset}px)` : `translateX(${offset}px)`,
             transition: animated ? undefined : 'none',
           }}
           onTransitionEnd={handleTransitionEnd}
@@ -137,11 +147,18 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
   );
 }
 
-function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
+const ARROW_PATHS = {
+  left: 'M15 5l-7 7 7 7',
+  right: 'M9 5l7 7-7 7',
+  up: 'M5 15l7-7 7 7',
+  down: 'M5 9l7 7 7-7',
+} as const;
+
+function ArrowIcon({ direction }: { direction: keyof typeof ARROW_PATHS }) {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
       <path
-        d={direction === 'left' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}
+        d={ARROW_PATHS[direction]}
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
