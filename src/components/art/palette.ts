@@ -1,4 +1,4 @@
-import type { TimeOfDay } from '../../../scenes/rooms';
+import type { TimeOfDay } from '../../scenes/rooms';
 
 export interface ScenePalette {
   /** Sky gradient stops: top, middle, horizon. */

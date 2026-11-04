@@ -1,6 +1,6 @@
 import { useId } from 'react';
-import type { TimeOfDay } from '../../../scenes/rooms';
-import { createRandom, randomRange } from '../../../utils/random';
+import type { TimeOfDay } from '../../scenes/rooms';
+import { createRandom, randomRange } from '../../utils/random';
 import { PALETTES, svgId } from './palette';
 import { Sky } from './Sky';
 

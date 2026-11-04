@@ -1,4 +1,3 @@
-# Development image: runs the Vite dev server with hot reload.
 FROM node:24-alpine
 
 WORKDIR /app

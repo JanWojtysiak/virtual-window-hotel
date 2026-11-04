@@ -1,4 +1,4 @@
-import { createRandom, randomRange } from '../../../utils/random';
+import { createRandom, randomRange } from '../../utils/random';
 import type { ScenePalette } from './palette';
 
 interface SkyProps {

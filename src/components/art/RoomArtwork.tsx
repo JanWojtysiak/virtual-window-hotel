@@ -1,4 +1,4 @@
-import type { SceneId, TimeOfDay } from '../../../scenes/rooms';
+import type { SceneId, TimeOfDay } from '../../scenes/rooms';
 import { ApartmentArt } from './ApartmentArt';
 import { CityArt } from './CityArt';
 import { GardenArt } from './GardenArt';

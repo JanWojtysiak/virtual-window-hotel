@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import type { TimeOfDay } from '../../../scenes/rooms';
+import type { TimeOfDay } from '../../scenes/rooms';
 import { PALETTES, svgId } from './palette';
 import { Sky } from './Sky';
 

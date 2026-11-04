@@ -4,13 +4,17 @@ services:
     ports:
       - '5173:5173'
     volumes:
-      # Source code is mounted live, so edits on the host show up instantly.
       - .:/app
-      # Keep container's own node_modules (Linux binaries), not the host's.
       - node_modules:/app/node_modules
     environment:
-      # File events don't cross Windows bind mounts – use polling instead.
       - VITE_USE_POLLING=true
+    # The named volume keeps node_modules from its first run and hides the image's fresh install,
+    # so reinstall whenever package-lock.json differs from the one installed last time.
+    command: >
+      sh -c "cmp -s package-lock.json node_modules/.installed-lock.json ||
+      (npm install && cp package-lock.json node_modules/.installed-lock.json);
+      npm run dev -- --host 0.0.0.0"
 
 volumes:
   node_modules:
+
