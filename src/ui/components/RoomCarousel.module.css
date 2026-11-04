@@ -1,0 +1,160 @@
+.section {
+  --visible: 3;
+  --gap: 28px;
+  --auto-advance: 4500ms;
+
+  padding: 64px var(--page-gutter) 72px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.heading {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+}
+
+.arrow {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+
+.arrow:hover,
+.arrow:focus-visible {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.viewport {
+  overflow: hidden;
+  /* Bleed to the screen edges so cards slide in from outside, with room for shadows. */
+  margin: -24px calc(-1 * var(--page-gutter));
+  padding: 24px var(--page-gutter);
+}
+
+.track {
+  display: flex;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.slide {
+  flex: 0 0 calc((100% - (var(--visible) - 1) * var(--gap)) / var(--visible));
+  min-width: 0;
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.slide:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.slide:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.slide:nth-child(n + 4) {
+  animation-delay: 0.3s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.progress {
+  height: 2px;
+  margin-top: 32px;
+  border-radius: 2px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+}
+
+.running {
+  animation: progress var(--auto-advance) linear both;
+}
+
+.paused {
+  transform: scaleX(0);
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (max-width: 1100px) {
+  .section {
+    --visible: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .section {
+    --visible: 1.15;
+    --gap: 16px;
+
+    padding-block: 40px 56px;
+  }
+
+  .controls {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    animation: none;
+  }
+}

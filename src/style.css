@@ -1,11 +1,56 @@
+:root {
+  --color-bg: #0a0e1a;
+  --color-bg-deep: #070a13;
+  --color-surface: #131a2a;
+  --color-text: #f2f0ea;
+  --color-text-soft: #d5d9e3;
+  --color-text-muted: #9aa3b5;
+  --color-border: rgb(255 255 255 / 0.08);
+  --color-border-strong: rgb(255 255 255 / 0.2);
+  --color-accent: #f2b544;
+  --color-accent-hover: #f7c766;
+  --color-accent-ink: #1c1606;
+
+  --font-serif: 'Manrope', system-ui, sans-serif;
+  --font-sans: 'Manrope', system-ui, sans-serif;
+
+  --navbar-height: 92px;
+  --page-gutter: clamp(16px, 3.5vw, 48px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html,
 body,
 #app {
   margin: 0;
+  min-height: 100%;
+}
+
+html {
   height: 100%;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  background: #87ceeb;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 820px) {
+  :root {
+    --navbar-height: 72px;
+  }
 }
