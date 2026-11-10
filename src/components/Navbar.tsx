@@ -4,6 +4,7 @@ import { WindowIcon } from './WindowIcon';
 const NAV_LINKS = [
   { label: 'Pokoje 2D', href: '#pokoje' },
   { label: 'Pokoje 3D', href: '#pokoje-3d' },
+  { label: 'AI', href: '#ai' },
 ];
 
 export function Navbar() {
