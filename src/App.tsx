@@ -1,3 +1,4 @@
+import { AiSection } from './components/AiSection';
 import { Footer } from './components/Footer';
 import { Navbar } from './components/Navbar';
 import { RoomCarousel } from './components/RoomCarousel';
@@ -16,6 +17,7 @@ export function App() {
       <Navbar />
       <main className="flex-1 bg-[radial-gradient(60%_50%_at_85%_0%,rgb(242_181_68/0.08),transparent_70%),radial-gradient(50%_60%_at_0%_100%,rgb(90_120_200/0.08),transparent_70%)]">
         <RoomCarousel rooms={ROOM_PREVIEWS} />
+        <AiSection />
       </main>
       <Footer />
     </div>
