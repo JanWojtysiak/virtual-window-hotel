@@ -224,7 +224,7 @@ export function AiSection() {
 
   return (
     <section id="ai" className="w-full px-(--page-gutter) py-16">
-      <p className="mb-2.5 text-[0.85rem] font-bold tracking-[0.2em] text-accent uppercase">
+      <p className="pixel-note mb-2.5 text-[0.75rem] font-bold tracking-[0.2em] text-accent uppercase">
         Sztuczna Inteligencja
       </p>
       <h2 className="mb-10 font-serif text-[length:clamp(2rem,4.5vw,3.25rem)] leading-[1.1] font-medium text-text">
@@ -236,7 +236,7 @@ export function AiSection() {
         <h3 className="mb-4 text-[1rem] font-semibold text-text">Wrzuć zdjęcie</h3>
         <label className="group flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border px-6 py-10 transition-colors hover:border-accent/50 hover:bg-accent/4">
           <UploadIcon />
-          <span className="text-[0.9rem] text-text-soft group-hover:text-accent">
+          <span className="pixel-note text-[0.8rem] text-text-soft group-hover:text-accent">
             {file ? file.name : 'Kliknij lub przeciągnij zdjęcie (JPG / PNG)'}
           </span>
           <input
@@ -277,17 +277,17 @@ export function AiSection() {
 
       {/* AI #1 – depth estimation */}
       <article className="mb-10 rounded-2xl border border-border bg-surface/60 px-6 py-7 mobile:px-4">
-        <p className="mb-1 text-[0.8rem] font-bold tracking-[0.18em] text-accent uppercase">
+        <p className="pixel-note mb-1 text-[0.7rem] font-bold tracking-[0.18em] text-accent uppercase">
           AI nr 1
         </p>
         <h3 className="mb-2 font-serif text-[1.6rem] leading-tight font-medium text-text">
           Głębia (Depth Anything V2)
         </h3>
-        <p className="mb-1 text-[0.95rem] leading-[1.6] text-text-soft">
+        <p className="pixel-note mb-1 text-[0.85rem] leading-[1.6] text-text-soft">
           Dla każdego piksela ocenia, jak daleko jest od aparatu. Jasne miejsca są blisko, ciemne –
           daleko. Z tej mapy da się potem pociąć zdjęcie na warstwy paralaksy.
         </p>
-        <p className="mb-6 text-[0.8rem] text-text-muted">
+        <p className="pixel-note mb-6 text-[0.72rem] text-text-muted">
           Model: {DEPTH_MODEL_INFO.name}, {DEPTH_MODEL_INFO.precision}, ok.{' '}
           {DEPTH_MODEL_INFO.sizeMb} MB – pobierany przy pierwszym użyciu i liczony lokalnie w
           przeglądarce (zdjęcie nigdzie nie jest wysyłane).
@@ -297,7 +297,7 @@ export function AiSection() {
           <>
             <div className="grid grid-cols-2 gap-6 mobile:grid-cols-1">
               <figure>
-                <figcaption className="mb-2 text-[0.85rem] font-semibold text-text-soft">
+                <figcaption className="pixel-note mb-2 text-[0.75rem] font-semibold text-text-soft">
                   Oryginał
                 </figcaption>
                 <img
@@ -307,7 +307,7 @@ export function AiSection() {
                 />
               </figure>
               <figure>
-                <figcaption className="mb-2 text-[0.85rem] font-semibold text-text-soft">
+                <figcaption className="pixel-note mb-2 text-[0.75rem] font-semibold text-text-soft">
                   Mapa głębi
                 </figcaption>
                 {depthUrl ? (
@@ -318,7 +318,7 @@ export function AiSection() {
                   />
                 ) : (
                   <div className="flex aspect-video items-center justify-center rounded-lg border border-border bg-bg-deep">
-                    <span className="text-[0.85rem] text-text-muted">
+                    <span className="pixel-note text-[0.75rem] text-text-muted">
                       Kliknij &quot;Estymuj głębię&quot; poniżej
                     </span>
                   </div>
@@ -327,7 +327,7 @@ export function AiSection() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <span className="text-[0.85rem] font-semibold text-text">Akcelerator:</span>
+              <span className="pixel-note text-[0.75rem] font-semibold text-text">Akcelerator:</span>
               <div
                 role="radiogroup"
                 aria-label="Akcelerator modelu"
@@ -381,7 +381,7 @@ export function AiSection() {
                 </button>
               )}
               {depthUrl && !depthRunning && (
-                <span className="flex items-center gap-2 text-[0.8rem] text-text-muted">
+                <span className="pixel-note flex items-center gap-2 text-[0.72rem] text-text-muted">
                   daleko
                   <span className="h-2.5 w-28 rounded-full bg-linear-to-r from-black to-white" />
                   blisko
@@ -404,12 +404,12 @@ export function AiSection() {
                     style={{ width: `${Math.round(depthStatus.overall * 100)}%` }}
                   />
                 </div>
-                <p className="mt-2 text-[0.8rem] text-text-muted">{depthStatusText(depthStatus)}</p>
+                <p className="pixel-note mt-2 text-[0.72rem] text-text-muted">{depthStatusText(depthStatus)}</p>
               </div>
             )}
 
             {depthRun && !depthRunning && (
-              <p className="mt-3 text-[0.8rem] text-text-muted">
+              <p className="pixel-note mt-3 text-[0.72rem] text-text-muted">
                 Policzone w Web Workerze na: <strong>{BACKEND_LABEL[depthRun.backend]}</strong>,
                 inferencja {Math.round(depthRun.inferenceMs)} ms.
                 {depthRun.fallbackReason && (
@@ -493,7 +493,7 @@ export function AiSection() {
                       />
                     </ErrorBoundary>
                     <div className="mt-4 grid max-w-2xl grid-cols-2 gap-6 mobile:grid-cols-1">
-                      <label className="text-[0.85rem] text-text-soft">
+                      <label className="pixel-note text-[0.75rem] text-text-soft">
                         Siła głębi: {depthScale.toFixed(2)}
                         <input
                           type="range"
@@ -505,7 +505,7 @@ export function AiSection() {
                           className="mt-2 block w-full accent-accent"
                         />
                       </label>
-                      <label className="text-[0.85rem] text-text-soft">
+                      <label className="pixel-note text-[0.75rem] text-text-soft">
                         Wygładzenie: {smoothing}
                         <input
                           type="range"
@@ -517,7 +517,7 @@ export function AiSection() {
                           className="mt-2 block w-full accent-accent"
                         />
                       </label>
-                      <label className="text-[0.85rem] text-text-soft">
+                      <label className="pixel-note text-[0.75rem] text-text-soft">
                         Próg krawędzi:{' '}
                         {edgeThreshold >= EDGE_OFF ? 'wyłączony' : edgeThreshold.toFixed(1)}
                         <input
@@ -530,7 +530,7 @@ export function AiSection() {
                           className="mt-2 block w-full accent-accent"
                         />
                       </label>
-                      <label className="flex items-center gap-2 self-end text-[0.85rem] text-text-soft">
+                      <label className="flex items-center gap-2 self-end pixel-note text-[0.75rem] text-text-soft">
                         <input
                           type="checkbox"
                           checked={showEdges}
@@ -540,7 +540,7 @@ export function AiSection() {
                         Pokaż odrzucane krawędzie (debug)
                       </label>
                     </div>
-                    <p className="mt-2 text-[0.8rem] text-text-muted">
+                    <p className="pixel-note mt-2 text-[0.72rem] text-text-muted">
                       Rusz myszką nad obrazem – kamera Three.js obraca się wokół płaskorzeźby.
                       Trójkąty rozciągnięte na skoku głębi są odrzucane, a dziury zasłania rozmyta
                       warstwa tła.
@@ -548,7 +548,7 @@ export function AiSection() {
                   </>
                 ) : (
                   <div className="flex aspect-video max-h-[70vh] w-full items-center justify-center rounded-lg border border-border bg-bg-deep px-6 text-center">
-                    <span className="text-[0.85rem] text-text-muted">
+                    <span className="pixel-note text-[0.75rem] text-text-muted">
                       Podgląd 2D – cięcie zdjęcia na warstwy paralaksy (PixiJS) jest w
                       przygotowaniu.
                     </span>
@@ -558,7 +558,7 @@ export function AiSection() {
             )}
           </>
         ) : (
-          <p className="text-[0.85rem] text-text-muted">Najpierw wrzuć zdjęcie powyżej.</p>
+          <p className="pixel-note text-[0.75rem] text-text-muted">Najpierw wrzuć zdjęcie powyżej.</p>
         )}
       </article>
 
@@ -584,7 +584,7 @@ export function AiSection() {
                   }`}
                 >
                   <span className="block text-[1rem] font-semibold">{p.label}</span>
-                  <span className="mt-1 block text-[0.8rem] text-text-muted">{p.description}</span>
+                  <span className="pixel-note mt-1 block text-[0.72rem] text-text-muted">{p.description}</span>
                 </button>
               ))}
             </div>
@@ -623,7 +623,7 @@ export function AiSection() {
                 {keySaved ? 'Zapisano!' : 'Zapisz'}
               </button>
             </div>
-            <p className="mt-2 text-[0.8rem] text-text-muted">
+            <p className="pixel-note mt-2 text-[0.72rem] text-text-muted">
               Klucz zapisywany jest lokalnie w przeglądarce (localStorage). Potrzebny tylko do opisu
               sceny.
             </p>
@@ -641,17 +641,17 @@ export function AiSection() {
 
         {description && (
           <div className="mt-6 rounded-xl border border-border bg-bg-deep px-6 py-5">
-            <p className="mb-3 text-[0.95rem] leading-[1.6] text-text">{description.description}</p>
-            <p className="mb-2 text-[0.85rem] text-text-soft">
+            <p className="pixel-note mb-3 text-[0.85rem] leading-[1.6] text-text">{description.description}</p>
+            <p className="mb-2 pixel-note text-[0.75rem] text-text-soft">
               <strong>Nastrój:</strong> {description.mood}
             </p>
             {description.suggestedSounds.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                <span className="text-[0.85rem] text-text-soft">Dźwięki:</span>
+                <span className="pixel-note text-[0.75rem] text-text-soft">Dźwięki:</span>
                 {description.suggestedSounds.map((s) => (
                   <span
                     key={s}
-                    className="rounded-full bg-accent/12 px-3 py-0.5 text-[0.8rem] text-accent"
+                    className="pixel-note rounded-full bg-accent/12 px-3 py-0.5 text-[0.72rem] text-accent"
                   >
                     {s}
                   </span>
