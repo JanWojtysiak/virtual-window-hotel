@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- City layer 2 (mid): mid-distance towers. -->
+  <defs>
+    <linearGradient id="midTower" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2e2a44"/>
+      <stop offset="1" stop-color="#3c3554"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3b07c" stop-opacity="0.7"/>
+      <stop offset="0.5" stop-color="#5e5a86" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#2a2a48"/>
+    </linearGradient>
+    <pattern id="winsMid" width="36" height="40" patternUnits="userSpaceOnUse">
+      <rect x="6" y="8" width="11" height="18" fill="#ffcf7a"/>
+      <rect x="20" y="8" width="11" height="18" fill="#3a3550"/>
+    </pattern>
+    <pattern id="winsMidB" width="36" height="40" patternUnits="userSpaceOnUse">
+      <rect x="6" y="8" width="11" height="18" fill="#3a3550"/>
+      <rect x="20" y="8" width="11" height="18" fill="#ffe0a0"/>
+    </pattern>
+    <pattern id="glassBands" width="60" height="16" patternUnits="userSpaceOnUse">
+      <rect width="60" height="2" y="14" fill="#1a1a2c" opacity="0.6"/>
+    </pattern>
+  </defs>
+
+  <g>
+    <rect x="60" y="440" width="220" height="480" fill="url(#midTower)"/>
+    <rect x="70" y="460" width="200" height="460" fill="url(#winsMid)"/>
+    <rect x="330" y="360" width="180" height="560" fill="url(#glass)"/>
+    <rect x="330" y="360" width="180" height="560" fill="url(#glassBands)"/>
+    <rect x="1120" y="300" width="200" height="620" fill="url(#glass)"/>
+    <rect x="1120" y="300" width="200" height="620" fill="url(#glassBands)"/>
+    <path d="M1120 300 L1220 230 L1320 300 Z" fill="#2c2944"/>
+    <rect x="1218" y="160" width="4" height="72" fill="#2c2944"/>
+    <circle cx="1220" cy="158" r="5" fill="#ff4d4d"/>
+    <rect x="1380" y="420" width="240" height="500" fill="url(#midTower)"/>
+    <rect x="1390" y="440" width="220" height="480" fill="url(#winsMidB)"/>
+    <rect x="1680" y="380" width="200" height="540" fill="url(#midTower)"/>
+    <rect x="1690" y="400" width="180" height="520" fill="url(#winsMid)"/>
+  </g>
+</svg>

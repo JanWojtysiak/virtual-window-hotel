@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Apartment layer 0 (sky): outside sky and clouds visible through the window opening. -->
+  <defs>
+    <linearGradient id="outsideSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5ea2e0"/>
+      <stop offset="1" stop-color="#d6ecf8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Extended wider than the window opening (620..1300, 110..670) for parallax headroom -->
+  <rect x="440" y="30" width="1040" height="720" fill="url(#outsideSky)"/>
+  <g>
+    <ellipse cx="780" cy="230" rx="110" ry="26" fill="#ffffff" opacity="0.88"/>
+    <ellipse cx="1150" cy="190" rx="90" ry="20" fill="#ffffff" opacity="0.85"/>
+  </g>
+</svg>

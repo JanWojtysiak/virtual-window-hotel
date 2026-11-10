@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Apartment layer 2 (mid): walls with window cutout, floor, curtains, wall art, aquarium, and lamp. (Fish & bubbles are animated in PixiJS.) -->
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d9cbb8"/>
+      <stop offset="0.5" stop-color="#efe5d6"/>
+      <stop offset="1" stop-color="#d6c7b2"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a57a52"/>
+      <stop offset="1" stop-color="#7a5536"/>
+    </linearGradient>
+    <pattern id="planks" width="240" height="40" patternUnits="userSpaceOnUse">
+      <rect width="240" height="40" fill="none" stroke="#5e3f27" stroke-opacity="0.35" stroke-width="2"/>
+      <line x1="120" y1="0" x2="120" y2="40" stroke="#5e3f27" stroke-opacity="0.25" stroke-width="2"/>
+    </pattern>
+    <linearGradient id="sunbeam" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff6d8" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#fff6d8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="tank" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fd3e6" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#2a8aa8" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="curtain" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f6efe2"/>
+      <stop offset="0.3" stop-color="#e3d8c4"/>
+      <stop offset="0.6" stop-color="#f8f2e6"/>
+      <stop offset="1" stop-color="#dcd0ba"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Wall with transparent cutout for the window opening (620..1300, 110..670) -->
+  <path fill-rule="evenodd" fill="url(#wall)" d="M0 0 H1920 V780 H0 Z M620 110 H1300 V670 H620 Z"/>
+  <rect y="760" width="1920" height="20" fill="#f5f0e8"/>
+  <rect y="780" width="1920" height="300" fill="url(#floor)"/>
+  <rect y="780" width="1920" height="300" fill="url(#planks)"/>
+
+  <!-- Window frame and sill -->
+  <g>
+    <path fill-rule="evenodd" fill="#f7f5f0" d="M600 90 H1320 V690 H600 Z M620 110 H1300 V670 H620 Z"/>
+    <rect x="950" y="110" width="20" height="560" fill="#f7f5f0"/>
+    <rect x="580" y="686" width="760" height="22" rx="4" fill="#fbfaf6"/>
+  </g>
+
+  <!-- Curtains -->
+  <path d="M500 60 H640 C 630 300, 660 500, 610 760 H470 C 520 500, 490 300, 500 60 Z" fill="url(#curtain)"/>
+  <path d="M1280 60 H1420 C 1430 300, 1400 500, 1450 760 H1310 C 1260 500, 1290 300, 1280 60 Z" fill="url(#curtain)"/>
+  <rect x="460" y="50" width="1000" height="12" rx="6" fill="#8a7a66"/>
+
+  <!-- Sunbeam on the floor -->
+  <path d="M620 670 L1300 670 L1520 1080 L760 1080 Z" fill="url(#sunbeam)"/>
+
+  <!-- Wall art -->
+  <rect x="200" y="200" width="200" height="260" fill="#6b4a32"/>
+  <rect x="215" y="215" width="170" height="230" fill="#f2e6cf"/>
+  <circle cx="300" cy="300" r="50" fill="#e08a5a"/>
+  <path d="M215 445 L280 360 L330 410 L385 340 V445 Z" fill="#5b8a6a"/>
+
+  <!-- Aquarium on a cabinet (fish and bubbles are animated in PixiJS) -->
+  <g transform="translate(1520 560)">
+    <rect x="0" y="120" width="300" height="200" fill="#4a3324"/>
+    <rect x="10" y="135" width="135" height="170" fill="#5a3f2c"/>
+    <rect x="155" y="135" width="135" height="170" fill="#5a3f2c"/>
+    <rect x="0" y="0" width="300" height="120" fill="url(#tank)" stroke="#2b2b2b" stroke-width="6"/>
+    <rect x="3" y="98" width="294" height="20" fill="#d9c7a0"/>
+    <path d="M40 98 C 30 70, 50 50, 40 20 M60 98 C 70 70, 55 45, 66 25 M250 98 C 240 60, 262 40, 250 15" stroke="#2f8a4a" stroke-width="6" fill="none"/>
+    <rect x="0" y="-10" width="300" height="12" fill="#2b2b2b"/>
+  </g>
+
+  <!-- Floor lamp -->
+  <g transform="translate(170 780)">
+    <rect x="-4" y="-420" width="8" height="420" fill="#2a2a2a"/>
+    <ellipse cx="0" cy="0" rx="50" ry="10" fill="#2a2a2a"/>
+    <path d="M-60 -420 L60 -420 L40 -500 L-40 -500 Z" fill="#f2e2c0"/>
+  </g>
+</svg>

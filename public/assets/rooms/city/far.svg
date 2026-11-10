@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- City layer 1 (far): distant hazy skyline. -->
+  <defs>
+    <linearGradient id="farTower" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a4a6e"/>
+      <stop offset="1" stop-color="#8a6a7c"/>
+    </linearGradient>
+    <filter id="haze"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <pattern id="winsFar" width="18" height="22" patternUnits="userSpaceOnUse">
+      <rect x="4" y="5" width="9" height="11" fill="#ffd08a" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <g filter="url(#haze)">
+    <path fill="url(#farTower)" d="M0 920 V480 H90 V420 H160 V500 H230 V380 H300 V460 H380 V520 H470 V400 H520 V340 H560 V400 H620 V480 H720 V430 H800 V520 H880 V360 H960 V300 H990 V360 H1040 V470 H1130 V420 H1220 V500 H1300 V390 H1380 V450 H1460 V350 H1540 V470 H1640 V410 H1720 V500 H1820 V440 H1920 V920 Z"/>
+    <rect x="230" y="380" width="70" height="540" fill="url(#winsFar)"/>
+    <rect x="880" y="360" width="160" height="560" fill="url(#winsFar)"/>
+    <rect x="1460" y="350" width="80" height="570" fill="url(#winsFar)"/>
+  </g>
+</svg>

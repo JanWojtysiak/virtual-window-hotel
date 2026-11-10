@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Garden layer 3 (near): garden bench and foreground hedge just below the window. -->
+  <defs>
+    <filter id="leafNoise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="4"/>
+      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0.1  0 0 0 0 0  0 0 0 0.35 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+      <feBlend in2="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <!-- Garden bench -->
+  <g transform="translate(1400 840)">
+    <rect x="-90" y="-40" width="180" height="12" rx="3" fill="#8a5a3a"/>
+    <rect x="-90" y="-60" width="180" height="10" rx="3" fill="#9a6a46"/>
+    <rect x="-90" y="-22" width="180" height="12" rx="3" fill="#7a4c30"/>
+    <rect x="-80" y="-10" width="8" height="40" fill="#333"/>
+    <rect x="72" y="-10" width="8" height="40" fill="#333"/>
+  </g>
+
+  <!-- Foreground hedge just below the window -->
+  <path d="M0 1000 C 120 950, 240 980, 360 955 S 600 975, 760 950 S 1040 980, 1200 955 S 1500 975, 1650 950 S 1850 970, 1920 960 L1920 1080 L0 1080 Z" fill="#2e5e2a" filter="url(#leafNoise)"/>
+</svg>

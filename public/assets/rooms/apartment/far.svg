@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Apartment layer 1 (far): outdoor hills, trees, and house visible through the window. -->
+  <g>
+    <path d="M440 525 C 580 490, 720 470, 820 500 S 1060 460, 1480 505 L1480 740 L440 740 Z" fill="#7fa98a"/>
+    <circle cx="700" cy="560" r="70" fill="#3f7a3c"/>
+    <circle cx="780" cy="590" r="60" fill="#356a33"/>
+    <circle cx="1200" cy="560" r="80" fill="#3a7036"/>
+    <rect x="900" y="520" width="140" height="180" fill="#c9b8a4"/>
+    <path d="M890 520 L970 470 L1050 520 Z" fill="#a0523d"/>
+    <!-- House windows & door for crisp detail -->
+    <rect x="922" y="546" width="32" height="36" rx="3" fill="#689ec2" stroke="#f4efe6" stroke-width="3"/>
+    <rect x="986" y="546" width="32" height="36" rx="3" fill="#689ec2" stroke="#f4efe6" stroke-width="3"/>
+    <rect x="954" y="608" width="32" height="62" rx="3" fill="#7a4c32"/>
+  </g>
+</svg>
