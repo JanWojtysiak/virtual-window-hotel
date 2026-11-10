@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { dayNight, outdoorHalfExtents, outdoorPlaneScale } from './windowView';
+import {
+  dayNight,
+  fitVerticalFov,
+  idleSway,
+  introProgress,
+  mullionPositions,
+  outdoorHalfExtents,
+  outdoorPlaneScale,
+} from './windowView';
 import { generateSmudgeMap } from './smudgeMap';
 
 describe('outdoorHalfExtents', () => {
@@ -47,6 +55,55 @@ describe('dayNight', () => {
     expect(dayNight(1, 0, 0.25)).toBeCloseTo(0.75);
     expect(dayNight(1, 0, 2)).toBe(0);
     expect(dayNight(1, 0, -1)).toBe(1);
+  });
+});
+
+describe('mullionPositions', () => {
+  it('splits the glazing into equal panes', () => {
+    const xs = mullionPositions(4.8, 3);
+    expect(xs).toHaveLength(2);
+    expect(xs[0]).toBeCloseTo(-0.8);
+    expect(xs[1]).toBeCloseTo(0.8);
+  });
+
+  it('has no mullions for a single pane', () => {
+    expect(mullionPositions(2, 1)).toEqual([]);
+  });
+});
+
+describe('fitVerticalFov', () => {
+  const shownHeight = (fov: number, distance: number) => 2 * distance * Math.tan(fov / 2);
+
+  it('fits the height on wide screens', () => {
+    expect(shownHeight(fitVerticalFov(4, 3, 3, 2), 3)).toBeCloseTo(3);
+  });
+
+  it('fits the width on slightly narrow screens', () => {
+    // 4 / 1.2 = 3.33 m tall frustum shows the full 4 m width.
+    expect(shownHeight(fitVerticalFov(4, 3, 3, 1.2), 3)).toBeCloseTo(4 / 1.2);
+  });
+
+  it('crops the sides on portrait screens instead of zooming out forever', () => {
+    expect(shownHeight(fitVerticalFov(4, 3, 3, 0.5, 1.45), 3)).toBeCloseTo(3 * 1.45);
+  });
+});
+
+describe('introProgress', () => {
+  it('starts at 0, ends at 1 and eases out', () => {
+    expect(introProgress(0, 2)).toBe(0);
+    expect(introProgress(2, 2)).toBe(1);
+    expect(introProgress(5, 2)).toBe(1);
+    expect(introProgress(1, 2)).toBeGreaterThan(0.5);
+  });
+});
+
+describe('idleSway', () => {
+  it('stays inside -1..1', () => {
+    for (let t = 0; t < 600; t += 0.7) {
+      const { x, y } = idleSway(t);
+      expect(Math.abs(x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(y)).toBeLessThanOrEqual(1);
+    }
   });
 });
 

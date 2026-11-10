@@ -4,17 +4,30 @@ import { createPhotoRelief, type DepthMeshSource } from '../objects/PhotoRelief'
 import { createWindowFrame, loadWindowModel, WINDOW } from '../objects/WindowFrame';
 import { createWindowGlass } from '../objects/WindowGlass';
 import { createCurtain, type Curtain } from '../objects/Curtain';
-import { dayNight, outdoorHalfExtents, outdoorPlaneScale } from '../utils/windowView';
+import {
+  dayNight,
+  fitVerticalFov,
+  idleSway,
+  introProgress,
+  outdoorHalfExtents,
+  outdoorPlaneScale,
+} from '../utils/windowView';
 
 /** Camera layer with everything that is behind the glass (rendered into a texture first). */
 const OUTSIDE_LAYER = 1;
 
-/** Viewer (camera) setup, metres. */
-const VIEWER_DISTANCE = 2.2;
-const VIEWER_RANGE_X = 0.45;
-const VIEWER_RANGE_Y = 0.28;
-/** How far behind the wall the photo stands. */
-const OUTDOOR_DISTANCE = 4;
+/** Viewer (camera) setup, metres. The eye is VIEWER_HEIGHT above the opening centre. */
+const VIEWER_DISTANCE = 3.6;
+const VIEWER_HEIGHT = 0.2;
+const VIEWER_RANGE_X = 0.85;
+const VIEWER_RANGE_Y = 0.3;
+/** How far behind the glazing the photo stands. */
+const OUTDOOR_DISTANCE = 6;
+/** Intro: the viewer starts this far back in the room and walks up to the window. */
+const INTRO_PULLBACK = 2.4;
+const INTRO_DURATION = 3.2;
+/** Seconds without pointer movement before the head starts swaying on its own. */
+const IDLE_AFTER = 2.5;
 
 export interface WindowViewOptions {
   depthScale: number;
@@ -62,10 +75,11 @@ function skyColor(image: TexImageSource): THREE.Color {
 }
 
 /**
- * Shows the uploaded photo as the view through a real 3D window: a wall with a recess that
- * hides part of the view when the viewer moves, a frame, a sill, dirty glass that reflects
- * the room and refracts rain drops, and a cloth-simulated curtain. The mouse moves the
- * viewer's head (camera position), like looking out of a window from different spots.
+ * Shows the uploaded photo as the view from a high-rise apartment: a wall-to-wall,
+ * floor-to-ceiling glazing with slim mullions, a wooden floor that the sun crosses with
+ * mullion shadows, a ceiling with downlights, dirty glass that reflects the room and
+ * refracts rain drops, and cloth-simulated floor-length curtains. The mouse moves the
+ * viewer's head (camera position); without input the head sways slowly on its own.
  */
 export function mountWindowView(
   host: HTMLElement,
@@ -103,14 +117,15 @@ export function mountWindowView(
     openingHeight: WINDOW.OPENING_HEIGHT,
     viewerDistance: VIEWER_DISTANCE,
     viewerRangeX: VIEWER_RANGE_X,
-    viewerRangeY: VIEWER_RANGE_Y,
+    // The eye sits above the opening centre, so cover the larger of the two vertical reaches.
+    viewerRangeY: VIEWER_HEIGHT + VIEWER_RANGE_Y,
     planeDistance: OUTDOOR_DISTANCE,
   });
   const outdoorScale = outdoorPlaneScale(
     relief.aspect,
     extents.halfWidth,
     extents.halfHeight,
-    1.25,
+    1.15,
   );
   relief.object.scale.setScalar(outdoorScale);
   relief.object.position.z = -OUTDOOR_DISTANCE;
@@ -120,15 +135,15 @@ export function mountWindowView(
   const nightSky = new THREE.Color(0x0b1224);
   const sky = new THREE.Color();
 
-  // --- Inside: wall, recess, frame, sill. ---
-  const frame = createWindowFrame();
+  // --- Inside: floor, ceiling, piers and the glazing profiles. ---
+  const frame = createWindowFrame(renderer.capabilities.getMaxAnisotropy());
   scene.add(frame.object);
   let disposed = false;
   let model: THREE.Group | null = null;
   void loadWindowModel().then((m) => {
     if (!m || disposed) return;
     model = m;
-    frame.object.visible = false;
+    frame.profiles.visible = false;
     scene.add(m);
   });
 
@@ -144,63 +159,56 @@ export function mountWindowView(
   });
   glass.setSceneTexture(outsideTarget.texture);
 
-  // --- Curtains: two gathered sheer panels on a rod. ---
-  const rodY = WINDOW.OPENING_HEIGHT / 2 + 0.22;
-  const rodZ = 0.13;
-  const curtainHeight = rodY + WINDOW.OPENING_HEIGHT / 2 - 0.05; // ends just above the sill
+  // --- Curtains: two floor-length sheer panels gathered at the sides, hung from a ceiling
+  // track in the curtain pocket. ---
+  const floorY = -WINDOW.OPENING_HEIGHT / 2;
+  const trackY = WINDOW.OPENING_HEIGHT / 2 - 0.02;
+  const trackZ = 0.12;
   const curtainOptions = {
-    cols: 18,
-    rows: 26,
-    width: 0.78,
-    height: curtainHeight,
-    gather: 0.55,
-    foldDepth: 0.06,
+    cols: 20,
+    rows: 30,
+    width: 1.5,
+    height: WINDOW.OPENING_HEIGHT - 0.06, // hem just above the floor
+    gather: 0.62,
+    foldDepth: 0.07,
     damping: 0.975,
     iterations: 10,
     wallZ: 0.03,
+    floorY: floorY + 0.005,
   };
   const panelWidth = curtainOptions.width * (1 - curtainOptions.gather);
   const curtains: Curtain[] = [
-    createCurtain({ ...curtainOptions, origin: [-WINDOW.OPENING_WIDTH / 2 - 0.3, rodY, rodZ] }),
     createCurtain({
       ...curtainOptions,
-      origin: [WINDOW.OPENING_WIDTH / 2 + 0.3 - panelWidth, rodY, rodZ],
+      origin: [-WINDOW.OPENING_WIDTH / 2 - 0.25, trackY, trackZ],
+    }),
+    createCurtain({
+      ...curtainOptions,
+      origin: [WINDOW.OPENING_WIDTH / 2 + 0.25 - panelWidth, trackY, trackZ],
     }),
   ];
   for (const c of curtains) scene.add(c.mesh);
-  const rodMaterial = new THREE.MeshStandardMaterial({
-    color: 0x3a3430,
-    metalness: 0.6,
-    roughness: 0.4,
-  });
-  const rod = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.012, 0.012, WINDOW.OPENING_WIDTH + 0.75, 12),
-    rodMaterial,
-  );
-  rod.rotation.z = Math.PI / 2;
-  rod.position.set(0, rodY + 0.012, rodZ);
-  rod.castShadow = true;
-  scene.add(rod);
 
-  // --- Lights: daylight through the window, ambient room light, a lamp for the night. ---
+  // --- Lights: low sun through the glazing (long mullion shadows across the floor),
+  // ambient room light, warm ceiling light for the night. ---
   const hemi = new THREE.HemisphereLight(0xfff6ea, 0x8a7f72, 1.6);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight(0xfff1dc, 3);
-  sun.position.set(-1.6, 2.6, -4);
-  sun.target.position.set(0.3, -1, 0.6);
+  sun.position.set(-2.6, 3.4, -5.5);
+  sun.target.position.set(0.6, floorY, 1.8);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
-  sun.shadow.camera.left = -2;
-  sun.shadow.camera.right = 2;
-  sun.shadow.camera.top = 2;
-  sun.shadow.camera.bottom = -2;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -5;
+  sun.shadow.camera.right = 5;
+  sun.shadow.camera.top = 5;
+  sun.shadow.camera.bottom = -5;
   sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 10;
+  sun.shadow.camera.far = 18;
   sun.shadow.bias = -0.0008;
-  sun.shadow.normalBias = 0.02;
+  sun.shadow.normalBias = 0.03;
   scene.add(sun, sun.target);
-  const lamp = new THREE.PointLight(0xffb36b, 0, 8, 1.4);
-  lamp.position.set(1.5, 0.6, 1.7);
+  const lamp = new THREE.PointLight(0xffc58a, 0, 10, 1.3);
+  lamp.position.set(0, WINDOW.OPENING_HEIGHT / 2 - 0.3, 2.2);
   scene.add(lamp);
   const moonColor = new THREE.Color(0x8fa6d8);
   const sunColor = new THREE.Color(0xfff1dc);
@@ -218,7 +226,8 @@ export function mountWindowView(
     hemi.intensity = dayNight(2.6, 0.3, n);
     sun.intensity = dayNight(3, 0.35, n) * (1 - wet * 0.6);
     sun.color.copy(sunColor).lerp(moonColor, n);
-    lamp.intensity = dayNight(0, 3.5, n);
+    lamp.intensity = dayNight(0, 6, n);
+    frame.setDownlights(n);
   };
   applyLighting();
 
@@ -236,17 +245,19 @@ export function mountWindowView(
   canvas.addEventListener('webglcontextlost', onContextLost);
   canvas.addEventListener('webglcontextrestored', onContextRestored);
 
-  // --- Size: keep the whole opening plus some wall in view on any aspect ratio. ---
+  // --- Size: the glazing fills the view edge to edge, with a strip of floor and ceiling.
+  // Portrait screens crop the sides – the glass wall is meant to be bigger than the screen.
   const bufferSize = new THREE.Vector2();
   const resize = (): void => {
     const w = Math.max(host.clientWidth, 1);
     const h = Math.max(host.clientHeight, 1);
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    const needH = WINDOW.OPENING_HEIGHT + 0.95;
-    const needW = WINDOW.OPENING_WIDTH + 1.1;
-    const vFov = 2 * Math.atan(Math.max(needH, needW / camera.aspect) / 2 / VIEWER_DISTANCE);
-    camera.fov = THREE.MathUtils.radToDeg(vFov);
+    const needH = WINDOW.OPENING_HEIGHT + 0.3;
+    const needW = WINDOW.OPENING_WIDTH + 0.5;
+    camera.fov = THREE.MathUtils.radToDeg(
+      fitVerticalFov(needW, needH, VIEWER_DISTANCE, camera.aspect),
+    );
     camera.updateProjectionMatrix();
     renderer.getDrawingBufferSize(bufferSize);
     outsideTarget.setSize(bufferSize.x, bufferSize.y);
@@ -256,23 +267,36 @@ export function mountWindowView(
   resizeObserver.observe(host);
   resize();
 
-  // --- Viewer: pointer position moves the head. ---
+  // --- Viewer: pointer position moves the head; idle → slow sway. ---
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const timer = new THREE.Timer();
   const target = new THREE.Vector2(0, 0);
   const current = new THREE.Vector2(0, 0);
+  let lastPointerTime = -Infinity;
+  let pointerInside = false;
   const onPointerMove = (e: PointerEvent): void => {
     const rect = host.getBoundingClientRect();
     target.set(
       ((e.clientX - rect.left) / rect.width) * 2 - 1,
       ((e.clientY - rect.top) / rect.height) * 2 - 1,
     );
+    pointerInside = true;
+    lastPointerTime = timer.getElapsed();
   };
   const onPointerLeave = (): void => {
+    pointerInside = false;
     target.set(0, 0);
   };
   host.addEventListener('pointermove', onPointerMove);
   host.addEventListener('pointerleave', onPointerLeave);
 
-  const timer = new THREE.Timer();
+  // Fade in from black together with the intro walk.
+  canvas.style.opacity = '0';
+  canvas.style.transition = reducedMotion ? 'none' : 'opacity 1.4s ease-out';
+  const fadeIn = requestAnimationFrame(() => {
+    canvas.style.opacity = '1';
+  });
+
   const gravity = [0, -9.81, 0] as const;
 
   renderer.setAnimationLoop((now) => {
@@ -280,10 +304,18 @@ export function mountWindowView(
     const dt = Math.min(timer.getDelta(), 0.1);
     const time = timer.getElapsed();
 
-    current.lerp(target, 0.06);
+    const idle = !pointerInside || time - lastPointerTime > IDLE_AFTER;
+    if (idle && !reducedMotion) {
+      const sway = idleSway(time);
+      target.set(sway.x, sway.y);
+    }
+    current.lerp(target, idle ? 0.02 : 0.06);
+    const intro = reducedMotion ? 1 : introProgress(time, INTRO_DURATION);
     // Moving the head right shows more of the left side of the outdoors, like a real window.
-    camera.position.set(current.x * VIEWER_RANGE_X, -current.y * VIEWER_RANGE_Y, VIEWER_DISTANCE);
-    camera.lookAt(current.x * VIEWER_RANGE_X * 0.3, -current.y * VIEWER_RANGE_Y * 0.3, 0);
+    const eyeX = current.x * VIEWER_RANGE_X;
+    const eyeY = VIEWER_HEIGHT - current.y * VIEWER_RANGE_Y;
+    camera.position.set(eyeX, eyeY, VIEWER_DISTANCE + (1 - intro) * INTRO_PULLBACK);
+    camera.lookAt(eyeX * 0.3, VIEWER_HEIGHT * 0.3 + (eyeY - VIEWER_HEIGHT) * 0.3, 0);
 
     // Draught through the window: mostly into the room, a bit sideways.
     const w = state.wind;
@@ -318,6 +350,7 @@ export function mountWindowView(
     },
     dispose() {
       disposed = true;
+      cancelAnimationFrame(fadeIn);
       renderer.setAnimationLoop(null);
       canvas.removeEventListener('webglcontextlost', onContextLost);
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
@@ -328,8 +361,6 @@ export function mountWindowView(
       frame.dispose();
       glass.dispose();
       for (const c of curtains) c.dispose();
-      rod.geometry.dispose();
-      rodMaterial.dispose();
       model?.traverse((o) => {
         if (o instanceof THREE.Mesh) {
           o.geometry.dispose();

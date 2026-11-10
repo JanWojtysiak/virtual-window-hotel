@@ -253,12 +253,15 @@ export function AiSection() {
         <article className="mb-10 rounded-2xl border border-border bg-surface/60 px-6 py-7 mobile:px-4">
           <p className="mb-1 text-[0.8rem] font-bold tracking-[0.18em] text-accent uppercase">3D</p>
           <h3 className="mb-2 font-serif text-[1.6rem] leading-tight font-medium text-text">
-            Widok przez okno
+            Widok z apartamentu
           </h3>
           <p className="mb-6 text-[0.95rem] leading-[1.6] text-text-soft">
-            Zdjęcie stoi za prawdziwym oknem 3D: wnęka w ścianie zasłania część widoku, gdy ruszasz
-            myszką, szyba jest lekko brudna i odbija pokój (mocniej nocą), krople deszczu załamują
-            obraz, a firanka to symulacja tkaniny poruszana wiatrem.
+            Zdjęcie jest widokiem za przeszkloną ścianą apartamentu – od podłogi do sufitu, od
+            ściany do ściany. Rusz myszką, żeby przejść się przed szybą: szprosy i firanki
+            przesuwają się na tle widoku, słońce rysuje ich cienie na podłodze, nocą zapalają się
+            światła w suficie, a szyba mocniej odbija pokój. Krople deszczu załamują obraz, a
+            firanki to symulacja tkaniny poruszana wiatrem. Kliknij „Pełny ekran”, żeby cały ekran
+            stał się oknem.
             {!depthSource && ' Bez mapy głębi widok jest płaski – policz głębię w „AI nr 1”.'}
           </p>
           <ErrorBoundary

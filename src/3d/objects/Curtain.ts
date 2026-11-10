@@ -16,11 +16,13 @@ export interface Curtain {
  * map 1:1 onto the vertices of a PlaneGeometry (same row-major order, top-left first).
  */
 export function createCurtain(
-  options: ClothOptions & { color?: THREE.ColorRepresentation; wallZ: number },
+  options: ClothOptions & { color?: THREE.ColorRepresentation; wallZ: number; floorY?: number },
 ): Curtain {
   const cloth = new Cloth(options);
-  // Keep the fabric in front of the wall.
+  // Keep the fabric in front of the wall (and above the floor for floor-length curtains).
   cloth.addCollider({ normal: [0, 0, 1], offset: options.wallZ });
+  if (options.floorY !== undefined)
+    cloth.addCollider({ normal: [0, 1, 0], offset: options.floorY });
 
   const geometry = new THREE.PlaneGeometry(1, 1, options.cols - 1, options.rows - 1);
   const position = geometry.getAttribute('position') as THREE.BufferAttribute;

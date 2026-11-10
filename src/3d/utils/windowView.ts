@@ -51,3 +51,43 @@ export function dayNight(day: number, night: number, t: number): number {
   const k = Math.min(Math.max(t, 0), 1);
   return day + (night - day) * k;
 }
+
+/** x of the mullions between `panes` equal panes of a glazing `width` wide, centred on 0. */
+export function mullionPositions(width: number, panes: number): number[] {
+  const out: number[] = [];
+  for (let k = 1; k < panes; k++) out.push(-width / 2 + (k * width) / panes);
+  return out;
+}
+
+/**
+ * Vertical field of view (radians) that shows a `needWidth × needHeight` rectangle at
+ * `distance`. Narrow (portrait) screens crop the sides instead of zooming out without
+ * limit: the shown height grows to at most `maxStretch × needHeight`.
+ */
+export function fitVerticalFov(
+  needWidth: number,
+  needHeight: number,
+  distance: number,
+  aspect: number,
+  maxStretch = 1.45,
+): number {
+  const span = Math.max(needHeight, Math.min(needWidth / aspect, needHeight * maxStretch));
+  return 2 * Math.atan(span / 2 / distance);
+}
+
+/** Ease-out cubic progress 0 → 1 of the intro "walk up to the window" after `time` s. */
+export function introProgress(time: number, duration: number): number {
+  const t = Math.min(Math.max(time / duration, 0), 1);
+  return 1 - (1 - t) ** 3;
+}
+
+/**
+ * Slow, non-repeating sway of the viewer's head (each axis within -1..1) used while
+ * nobody moves the pointer, so the parallax keeps "breathing" on its own.
+ */
+export function idleSway(time: number): { x: number; y: number } {
+  return {
+    x: Math.sin(time * 0.21) * 0.55 + Math.sin(time * 0.077 + 1.3) * 0.25,
+    y: Math.sin(time * 0.13 + 0.7) * 0.35,
+  };
+}
