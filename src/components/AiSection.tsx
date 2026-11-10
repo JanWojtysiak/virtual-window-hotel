@@ -14,6 +14,10 @@ import {
   describeImage,
   type SceneDescription,
 } from '../ai';
+import type { DepthMeshSource } from '../3d';
+import { DepthRelief } from './DepthRelief';
+
+type PreviewMode = '2d' | '3d';
 
 export function AiSection() {
   const [provider, setProvider] = useState<ProviderId>(loadSelectedProvider);
@@ -28,6 +32,11 @@ export function AiSection() {
   const [description, setDescription] = useState<SceneDescription | null>(null);
   const [descLoading, setDescLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [depthSource, setDepthSource] = useState<DepthMeshSource | null>(null);
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('3d');
+  const [depthScale, setDepthScale] = useState(0.35);
+  const [smoothing, setSmoothing] = useState(2);
 
   const depthCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -49,6 +58,7 @@ export function AiSection() {
     if (!f) return;
     setFile(f);
     setDepthUrl(null);
+    setDepthSource(null);
     setDescription(null);
     setError(null);
     const reader = new FileReader();
@@ -84,6 +94,8 @@ export function AiSection() {
       const depthCanvas = depthToCanvas(depthMap, canvas.width, canvas.height);
       depthCanvasRef.current = depthCanvas;
       setDepthUrl(depthCanvas.toDataURL());
+      // The same depth map feeds both previews (2D layers and 3D relief).
+      setDepthSource({ image: img, depth: depthMap, width: canvas.width, height: canvas.height });
       setDepthProgress(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Błąd estymacji głębi');
@@ -211,6 +223,87 @@ export function AiSection() {
                   className="h-full rounded-full bg-accent transition-all duration-300"
                   style={{ width: `${Math.round(depthProgress * 100)}%` }}
                 />
+              </div>
+            )}
+
+            {depthSource && (
+              <div className="mt-8">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="text-[0.9rem] font-semibold text-text">Podgląd:</span>
+                  <div
+                    role="radiogroup"
+                    aria-label="Rodzaj podglądu"
+                    className="inline-flex rounded-lg border border-border bg-bg-deep p-1"
+                  >
+                    {(
+                      [
+                        ['2d', '2D (warstwy)'],
+                        ['3d', '3D (płaskorzeźba)'],
+                      ] as const
+                    ).map(([mode, label]) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        role="radio"
+                        aria-checked={previewMode === mode}
+                        onClick={() => setPreviewMode(mode)}
+                        className={`cursor-pointer rounded-md px-4 py-2 text-[0.85rem] font-semibold transition-colors ${
+                          previewMode === mode
+                            ? 'bg-accent text-accent-ink'
+                            : 'text-text-soft hover:text-accent'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {previewMode === '3d' ? (
+                  <>
+                    <DepthRelief
+                      source={depthSource}
+                      depthScale={depthScale}
+                      smoothing={smoothing}
+                    />
+                    <div className="mt-4 grid max-w-2xl grid-cols-2 gap-6 mobile:grid-cols-1">
+                      <label className="text-[0.85rem] text-text-soft">
+                        Siła głębi: {depthScale.toFixed(2)}
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={depthScale}
+                          onChange={(e) => setDepthScale(Number(e.target.value))}
+                          className="mt-2 block w-full accent-accent"
+                        />
+                      </label>
+                      <label className="text-[0.85rem] text-text-soft">
+                        Wygładzenie: {smoothing}
+                        <input
+                          type="range"
+                          min={0}
+                          max={8}
+                          step={1}
+                          value={smoothing}
+                          onChange={(e) => setSmoothing(Number(e.target.value))}
+                          className="mt-2 block w-full accent-accent"
+                        />
+                      </label>
+                    </div>
+                    <p className="mt-2 text-[0.8rem] text-text-muted">
+                      Rusz myszką nad obrazem – kamera Three.js obraca się wokół płaskorzeźby.
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex aspect-video max-h-[70vh] w-full items-center justify-center rounded-lg border border-border bg-bg-deep px-6 text-center">
+                    <span className="text-[0.85rem] text-text-muted">
+                      Podgląd 2D – cięcie zdjęcia na warstwy paralaksy (PixiJS) jest w
+                      przygotowaniu.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </>

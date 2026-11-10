@@ -1,2 +1,2 @@
 // Three.js helpers: disposal, math, etc.
-export {};
+export * from './depthGrid';
