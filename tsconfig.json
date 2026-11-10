@@ -15,7 +15,8 @@
     "moduleDetection": "force",
     "noEmit": true,
     "paths": {
-      "onnxruntime-web": ["./node_modules/onnxruntime-web/types.d.ts"]
+      "onnxruntime-web": ["./node_modules/onnxruntime-web/types.d.ts"],
+      "onnxruntime-web/webgpu": ["./node_modules/onnxruntime-web/types.d.ts"]
     },
 
     /* Linting */

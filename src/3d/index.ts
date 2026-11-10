@@ -5,3 +5,4 @@ export * from './lighting';
 export * from './controls';
 export * from './loaders';
 export * from './utils';
+export * from './workers';

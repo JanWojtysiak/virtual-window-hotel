@@ -1,4 +1,5 @@
 import { AiSection } from './components/AiSection';
+import { ErrorBoundary, ErrorCard } from './components/ErrorBoundary';
 import { Footer } from './components/Footer';
 import { Navbar } from './components/Navbar';
 import { RoomCarousel } from './components/RoomCarousel';
@@ -17,7 +18,20 @@ export function App() {
       <Navbar />
       <main className="flex-1 bg-[radial-gradient(60%_50%_at_85%_0%,rgb(242_181_68/0.08),transparent_70%),radial-gradient(50%_60%_at_0%_100%,rgb(90_120_200/0.08),transparent_70%)]">
         <RoomCarousel rooms={ROOM_PREVIEWS} />
-        <AiSection />
+        {/* A crash in the AI tools (WebGL, workers, models) must not blank the whole page. */}
+        <ErrorBoundary
+          fallback={(err, reset) => (
+            <section className="w-full px-(--page-gutter) py-16">
+              <ErrorCard
+                title="Sekcja AI przestała działać"
+                message={err.message}
+                onRetry={reset}
+              />
+            </section>
+          )}
+        >
+          <AiSection />
+        </ErrorBoundary>
       </main>
       <Footer />
     </div>

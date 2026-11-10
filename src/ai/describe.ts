@@ -1,8 +1,4 @@
-import {
-  type ProviderId,
-  getProvider,
-  loadApiKey,
-} from './provider';
+import { type ProviderId, getProvider, loadApiKey } from './provider';
 
 export interface SceneDescription {
   description: string;

@@ -134,7 +134,12 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
           >
             <ArrowIcon direction={vertical ? 'up' : 'left'} />
           </button>
-          <button type="button" className={ARROW_CLASSES} onClick={next} aria-label="Następny pokój">
+          <button
+            type="button"
+            className={ARROW_CLASSES}
+            onClick={next}
+            aria-label="Następny pokój"
+          >
             <ArrowIcon direction={vertical ? 'down' : 'right'} />
           </button>
         </div>

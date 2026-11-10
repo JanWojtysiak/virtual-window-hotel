@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type ProviderId,
   PROVIDERS,
@@ -6,18 +6,52 @@ import {
   saveSelectedProvider,
   loadApiKey,
   saveApiKey,
-  loadDepthModel,
-  isDepthModelLoaded,
-  estimateDepth,
-  depthToCanvas,
   DEPTH_MODEL_INFO,
+  DepthAbortedError,
+  getDepthEstimator,
+  type DepthBackend,
+  type DepthBackendPreference,
+  type DepthProgress,
   describeImage,
   type SceneDescription,
 } from '../ai';
 import type { DepthMeshSource } from '../3d';
 import { DepthRelief } from './DepthRelief';
+import { ErrorBoundary, ErrorCard } from './ErrorBoundary';
 
 type PreviewMode = '2d' | '3d';
+
+interface DepthRunInfo {
+  backend: DepthBackend;
+  fallbackReason?: string;
+  inferenceMs: number;
+}
+
+const BACKEND_LABEL: Record<DepthBackend, string> = {
+  webgpu: 'WebGPU (karta graficzna)',
+  wasm: 'WASM (procesor)',
+};
+
+/** One-line description of what the worker is doing right now. */
+function depthStatusText(p: DepthProgress): string {
+  const on = p.backend ? ` – ${BACKEND_LABEL[p.backend]}` : '';
+  switch (p.stage) {
+    case 'download': {
+      if (!p.totalBytes) return 'Pobieram model…';
+      const mb = (b: number) => (b / 1024 / 1024).toFixed(0);
+      return `Pobieram model… ${mb(p.loadedBytes ?? 0)} / ${mb(p.totalBytes)} MB`;
+    }
+    case 'init':
+      return `Uruchamiam model${on}…`;
+    case 'inference':
+      return `Liczę głębię${on}…`;
+    case 'postprocess':
+      return 'Przygotowuję mapę głębi…';
+  }
+}
+
+/** Edge threshold slider value that means "keep every triangle". */
+const EDGE_OFF = 12;
 
 export function AiSection() {
   const [provider, setProvider] = useState<ProviderId>(loadSelectedProvider);
@@ -28,7 +62,10 @@ export function AiSection() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [depthUrl, setDepthUrl] = useState<string | null>(null);
-  const [depthProgress, setDepthProgress] = useState<number | null>(null);
+  const [depthStatus, setDepthStatus] = useState<DepthProgress | null>(null);
+  const [depthError, setDepthError] = useState<string | null>(null);
+  const [depthRun, setDepthRun] = useState<DepthRunInfo | null>(null);
+  const [backendPref, setBackendPref] = useState<DepthBackendPreference>('auto');
   const [description, setDescription] = useState<SceneDescription | null>(null);
   const [descLoading, setDescLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,8 +74,26 @@ export function AiSection() {
   const [previewMode, setPreviewMode] = useState<PreviewMode>('3d');
   const [depthScale, setDepthScale] = useState(0.35);
   const [smoothing, setSmoothing] = useState(2);
+  const [edgeThreshold, setEdgeThreshold] = useState(3);
+  const [showEdges, setShowEdges] = useState(false);
 
-  const depthCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  /** Increments on every run / new photo, so late results of an old run are ignored. */
+  const depthRunId = useRef(0);
+  const depthRunning = depthStatus !== null;
+
+  // Object URLs of depth PNGs must be released, or every run leaks a few MB.
+  useEffect(() => {
+    if (!depthUrl) return;
+    return () => URL.revokeObjectURL(depthUrl);
+  }, [depthUrl]);
+
+  // Unmounting mid-run stops the worker (the model stays cached on disk).
+  useEffect(() => {
+    return () => {
+      const estimator = getDepthEstimator();
+      if (estimator.busy) estimator.abort();
+    };
+  }, []);
 
   const handleProviderChange = useCallback((id: ProviderId) => {
     setProvider(id);
@@ -57,6 +112,12 @@ export function AiSection() {
     const f = e.target.files?.[0];
     if (!f) return;
     setFile(f);
+    const estimator = getDepthEstimator();
+    if (estimator.busy) estimator.abort();
+    depthRunId.current++;
+    setDepthStatus(null);
+    setDepthError(null);
+    setDepthRun(null);
     setDepthUrl(null);
     setDepthSource(null);
     setDescription(null);
@@ -68,41 +129,55 @@ export function AiSection() {
 
   const handleDepth = useCallback(async () => {
     if (!preview) return;
-    setError(null);
-    setDepthProgress(0);
+    const runId = ++depthRunId.current;
+    const isCurrent = () => runId === depthRunId.current;
+    setDepthError(null);
+    setDepthStatus({ overall: 0, stage: 'download' });
     try {
-      if (!isDepthModelLoaded()) {
-        await loadDepthModel((p) => setDepthProgress(p * 0.8));
-      }
-      setDepthProgress(0.85);
-
+      // The <img> is the colour texture of the 3D relief; the bitmap goes to the worker.
       const img = new Image();
       img.src = preview;
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error('Nie udało się załadować obrazu'));
+      await img.decode().catch(() => {
+        throw new Error('Nie udało się wczytać zdjęcia (uszkodzony lub nieobsługiwany plik)');
       });
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const bitmap = await createImageBitmap(img);
 
-      setDepthProgress(0.9);
-      const depthMap = await estimateDepth(imageData);
-      const depthCanvas = depthToCanvas(depthMap, canvas.width, canvas.height);
-      depthCanvasRef.current = depthCanvas;
-      setDepthUrl(depthCanvas.toDataURL());
+      // Model download, inference and PNG encoding all run in a Web Worker – the page and
+      // the 3D view stay responsive the whole time.
+      const result = await getDepthEstimator().estimate(bitmap, {
+        backend: backendPref,
+        onProgress: (p) => {
+          if (isCurrent()) setDepthStatus(p);
+        },
+      });
+      if (!isCurrent()) return;
+
+      setDepthUrl(URL.createObjectURL(result.png));
+      setDepthRun({
+        backend: result.backend,
+        fallbackReason: result.fallbackReason,
+        inferenceMs: result.inferenceMs,
+      });
       // The same depth map feeds both previews (2D layers and 3D relief).
-      setDepthSource({ image: img, depth: depthMap, width: canvas.width, height: canvas.height });
-      setDepthProgress(1);
+      setDepthSource({
+        image: img,
+        depth: result.depth,
+        width: result.width,
+        height: result.height,
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Błąd estymacji głębi');
+      if (!isCurrent() || err instanceof DepthAbortedError) return;
+      setDepthError(err instanceof Error ? err.message : 'Błąd estymacji głębi');
     } finally {
-      setTimeout(() => setDepthProgress(null), 500);
+      if (isCurrent()) setDepthStatus(null);
     }
-  }, [preview]);
+  }, [preview, backendPref]);
+
+  const handleCancelDepth = useCallback(() => {
+    depthRunId.current++;
+    getDepthEstimator().abort();
+    setDepthStatus(null);
+  }, []);
 
   const handleDescribe = useCallback(async () => {
     if (!preview) return;
@@ -197,18 +272,61 @@ export function AiSection() {
               </figure>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <span className="text-[0.85rem] font-semibold text-text">Akcelerator:</span>
+              <div
+                role="radiogroup"
+                aria-label="Akcelerator modelu"
+                className="inline-flex rounded-lg border border-border bg-bg-deep p-1"
+              >
+                {(
+                  [
+                    ['auto', 'Auto (WebGPU → WASM)'],
+                    ['wasm', 'Tylko WASM (CPU)'],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={backendPref === value}
+                    disabled={depthRunning}
+                    onClick={() => setBackendPref(value)}
+                    className={`cursor-pointer rounded-md px-3 py-1.5 text-[0.8rem] font-semibold transition-colors disabled:cursor-not-allowed ${
+                      backendPref === value
+                        ? 'bg-accent text-accent-ink'
+                        : 'text-text-soft hover:text-accent'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-4">
               <button
                 type="button"
                 onClick={handleDepth}
-                disabled={depthProgress !== null}
+                disabled={depthRunning}
                 className="cursor-pointer rounded-lg bg-accent px-6 py-3 text-[0.9rem] font-semibold text-accent-ink transition-colors hover:bg-accent-hover disabled:cursor-wait disabled:opacity-60"
               >
-                {depthProgress !== null
-                  ? `Analizuję… ${Math.round(depthProgress * 100)}%`
-                  : 'Estymuj głębię'}
+                {depthRunning
+                  ? `Analizuję… ${Math.round(depthStatus.overall * 100)}%`
+                  : depthUrl
+                    ? 'Policz głębię ponownie'
+                    : 'Estymuj głębię'}
               </button>
-              {depthUrl && (
+              {depthRunning && (
+                <button
+                  type="button"
+                  onClick={handleCancelDepth}
+                  className="cursor-pointer rounded-lg border border-border px-5 py-3 text-[0.9rem] font-semibold text-text-soft transition-colors hover:border-accent hover:text-accent"
+                >
+                  Anuluj
+                </button>
+              )}
+              {depthUrl && !depthRunning && (
                 <span className="flex items-center gap-2 text-[0.8rem] text-text-muted">
                   daleko
                   <span className="h-2.5 w-28 rounded-full bg-linear-to-r from-black to-white" />
@@ -217,12 +335,53 @@ export function AiSection() {
               )}
             </div>
 
-            {depthProgress !== null && (
-              <div className="mt-4 h-2 max-w-md overflow-hidden rounded-full bg-bg-deep">
+            {depthRunning && (
+              <div className="mt-4 max-w-md" aria-live="polite">
                 <div
-                  className="h-full rounded-full bg-accent transition-all duration-300"
-                  style={{ width: `${Math.round(depthProgress * 100)}%` }}
+                  role="progressbar"
+                  aria-label="Postęp estymacji głębi"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(depthStatus.overall * 100)}
+                  className="h-2 overflow-hidden rounded-full bg-bg-deep"
+                >
+                  <div
+                    className="h-full rounded-full bg-accent transition-all duration-300"
+                    style={{ width: `${Math.round(depthStatus.overall * 100)}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[0.8rem] text-text-muted">{depthStatusText(depthStatus)}</p>
+              </div>
+            )}
+
+            {depthRun && !depthRunning && (
+              <p className="mt-3 text-[0.8rem] text-text-muted">
+                Policzone w Web Workerze na: <strong>{BACKEND_LABEL[depthRun.backend]}</strong>,
+                inferencja {Math.round(depthRun.inferenceMs)} ms.
+                {depthRun.fallbackReason && (
+                  <span className="block text-amber-300/80">
+                    Użyto zapasowego WASM – {depthRun.fallbackReason}
+                  </span>
+                )}
+              </p>
+            )}
+
+            {depthError && (
+              <div className="mt-4 max-w-2xl">
+                <ErrorCard
+                  title="Nie udało się policzyć głębi"
+                  message={depthError}
+                  onRetry={handleDepth}
                 />
+                {backendPref === 'auto' && (
+                  <button
+                    type="button"
+                    onClick={() => setBackendPref('wasm')}
+                    className="mt-2 cursor-pointer text-[0.8rem] text-text-muted underline hover:text-accent"
+                  >
+                    Przełącz na „Tylko WASM (CPU)” i spróbuj jeszcze raz
+                  </button>
+                )}
               </div>
             )}
 
@@ -261,11 +420,24 @@ export function AiSection() {
 
                 {previewMode === '3d' ? (
                   <>
-                    <DepthRelief
-                      source={depthSource}
-                      depthScale={depthScale}
-                      smoothing={smoothing}
-                    />
+                    <ErrorBoundary
+                      resetKey={depthSource}
+                      fallback={(err, reset) => (
+                        <ErrorCard
+                          title="Podgląd 3D niedostępny"
+                          message={err.message}
+                          onRetry={reset}
+                        />
+                      )}
+                    >
+                      <DepthRelief
+                        source={depthSource}
+                        depthScale={depthScale}
+                        smoothing={smoothing}
+                        edgeThreshold={edgeThreshold >= EDGE_OFF ? 1e9 : edgeThreshold}
+                        showEdges={showEdges}
+                      />
+                    </ErrorBoundary>
                     <div className="mt-4 grid max-w-2xl grid-cols-2 gap-6 mobile:grid-cols-1">
                       <label className="text-[0.85rem] text-text-soft">
                         Siła głębi: {depthScale.toFixed(2)}
@@ -291,9 +463,33 @@ export function AiSection() {
                           className="mt-2 block w-full accent-accent"
                         />
                       </label>
+                      <label className="text-[0.85rem] text-text-soft">
+                        Próg krawędzi:{' '}
+                        {edgeThreshold >= EDGE_OFF ? 'wyłączony' : edgeThreshold.toFixed(1)}
+                        <input
+                          type="range"
+                          min={0.5}
+                          max={EDGE_OFF}
+                          step={0.5}
+                          value={edgeThreshold}
+                          onChange={(e) => setEdgeThreshold(Number(e.target.value))}
+                          className="mt-2 block w-full accent-accent"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2 self-end text-[0.85rem] text-text-soft">
+                        <input
+                          type="checkbox"
+                          checked={showEdges}
+                          onChange={(e) => setShowEdges(e.target.checked)}
+                          className="accent-accent"
+                        />
+                        Pokaż odrzucane krawędzie (debug)
+                      </label>
                     </div>
                     <p className="mt-2 text-[0.8rem] text-text-muted">
                       Rusz myszką nad obrazem – kamera Three.js obraca się wokół płaskorzeźby.
+                      Trójkąty rozciągnięte na skoku głębi są odrzucane, a dziury zasłania rozmyta
+                      warstwa tła.
                     </p>
                   </>
                 ) : (
