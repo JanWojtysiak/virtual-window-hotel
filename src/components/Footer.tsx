@@ -29,7 +29,7 @@ export function Footer() {
             href="./"
           >
             <WindowIcon className="size-6 text-accent" />
-            <span>Hotel Widok</span>
+            <span>Wirtualna Rzeczywistość</span>
           </a>
           <p className="mt-3.5 max-w-[28ch] leading-[1.6]">
             Widok z okna, który zmienia się razem z Tobą.
@@ -58,7 +58,7 @@ export function Footer() {
       </div>
 
       <div className="mt-12 flex flex-wrap justify-between gap-3 border-t border-border pt-6 text-[0.875rem]">
-        <span>© {new Date().getFullYear()} Hotel Widok</span>
+        <span>© {new Date().getFullYear()} Wirtualna Rzeczywistość</span>
         <span>Hotel fikcyjny – projekt Virtual Window Hotel</span>
       </div>
     </footer>

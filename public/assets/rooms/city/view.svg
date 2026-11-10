@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- City view: dusk over downtown with a skyline, lit windows, street and traffic. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2350"/>
+      <stop offset="0.45" stop-color="#7a4a7e"/>
+      <stop offset="0.75" stop-color="#e3826a"/>
+      <stop offset="1" stop-color="#f7c07a"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe2a6"/>
+      <stop offset="0.3" stop-color="#ffb070" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ff9060" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="farTower" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a4a6e"/>
+      <stop offset="1" stop-color="#8a6a7c"/>
+    </linearGradient>
+    <linearGradient id="midTower" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2e2a44"/>
+      <stop offset="1" stop-color="#3c3554"/>
+    </linearGradient>
+    <linearGradient id="nearTower" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1b1a2a"/>
+      <stop offset="1" stop-color="#272538"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3b07c" stop-opacity="0.7"/>
+      <stop offset="0.5" stop-color="#5e5a86" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#2a2a48"/>
+    </linearGradient>
+    <linearGradient id="street" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2833"/>
+      <stop offset="1" stop-color="#16151c"/>
+    </linearGradient>
+    <radialGradient id="lampGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe2a0" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ffb84a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3a3a40"/>
+      <stop offset="1" stop-color="#25252a"/>
+    </linearGradient>
+    <filter id="haze"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+
+    <!-- Window grids: lit windows mixed with dark ones. -->
+    <pattern id="winsFar" width="18" height="22" patternUnits="userSpaceOnUse">
+      <rect x="4" y="5" width="9" height="11" fill="#ffd08a" opacity="0.55"/>
+    </pattern>
+    <pattern id="winsMid" width="36" height="40" patternUnits="userSpaceOnUse">
+      <rect x="6" y="8" width="11" height="18" fill="#ffcf7a"/>
+      <rect x="20" y="8" width="11" height="18" fill="#3a3550"/>
+    </pattern>
+    <pattern id="winsMidB" width="36" height="40" patternUnits="userSpaceOnUse">
+      <rect x="6" y="8" width="11" height="18" fill="#3a3550"/>
+      <rect x="20" y="8" width="11" height="18" fill="#ffe0a0"/>
+    </pattern>
+    <pattern id="glassBands" width="60" height="16" patternUnits="userSpaceOnUse">
+      <rect width="60" height="2" y="14" fill="#1a1a2c" opacity="0.6"/>
+    </pattern>
+
+    <!-- A car seen from the side: body, windows and lights. -->
+    <g id="car">
+      <path d="M-70 0 L-66 -24 L-36 -28 L-20 -48 L30 -48 L50 -28 L70 -24 L72 0 Z"/>
+      <path d="M-14 -44 L26 -44 L40 -30 L-28 -30 Z" fill="#9ab0cf" opacity="0.6"/>
+      <circle cx="-40" cy="0" r="12" fill="#111"/>
+      <circle cx="42" cy="0" r="12" fill="#111"/>
+    </g>
+  </defs>
+
+  <!-- Sky with setting sun -->
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="560" cy="560" r="320" fill="url(#sunGlow)"/>
+  <circle cx="560" cy="560" r="48" fill="#ffe7b6"/>
+  <g fill="#f3a0a0" opacity="0.35" filter="url(#haze)">
+    <ellipse cx="1300" cy="250" rx="260" ry="14"/>
+    <ellipse cx="400" cy="320" rx="220" ry="10"/>
+    <ellipse cx="1600" cy="380" rx="200" ry="12"/>
+  </g>
+
+  <!-- Far skyline (hazy) -->
+  <g filter="url(#haze)">
+    <path fill="url(#farTower)" d="M0 640 V480 H90 V420 H160 V500 H230 V380 H300 V460 H380 V520 H470 V400 H520 V340 H560 V400 H620 V480 H720 V430 H800 V520 H880 V360 H960 V300 H990 V360 H1040 V470 H1130 V420 H1220 V500 H1300 V390 H1380 V450 H1460 V350 H1540 V470 H1640 V410 H1720 V500 H1820 V440 H1920 V640 Z"/>
+    <rect x="230" y="380" width="70" height="260" fill="url(#winsFar)"/>
+    <rect x="880" y="360" width="160" height="280" fill="url(#winsFar)"/>
+    <rect x="1460" y="350" width="80" height="290" fill="url(#winsFar)"/>
+  </g>
+
+  <!-- Mid-distance towers -->
+  <g>
+    <rect x="60" y="440" width="220" height="400" fill="url(#midTower)"/>
+    <rect x="70" y="460" width="200" height="380" fill="url(#winsMid)"/>
+    <rect x="330" y="360" width="180" height="480" fill="url(#glass)"/>
+    <rect x="330" y="360" width="180" height="480" fill="url(#glassBands)"/>
+    <rect x="1120" y="300" width="200" height="540" fill="url(#glass)"/>
+    <rect x="1120" y="300" width="200" height="540" fill="url(#glassBands)"/>
+    <path d="M1120 300 L1220 230 L1320 300 Z" fill="#2c2944"/>
+    <rect x="1218" y="160" width="4" height="72" fill="#2c2944"/>
+    <circle cx="1220" cy="158" r="5" fill="#ff4d4d"/>
+    <rect x="1380" y="420" width="240" height="420" fill="url(#midTower)"/>
+    <rect x="1390" y="440" width="220" height="400" fill="url(#winsMidB)"/>
+    <rect x="1680" y="380" width="200" height="460" fill="url(#midTower)"/>
+    <rect x="1690" y="400" width="180" height="440" fill="url(#winsMid)"/>
+  </g>
+
+  <!-- Near buildings framing the street -->
+  <g>
+    <rect x="560" y="520" width="260" height="360" fill="url(#nearTower)"/>
+    <rect x="575" y="540" width="230" height="300" fill="url(#winsMidB)"/>
+    <rect x="860" y="470" width="220" height="410" fill="url(#nearTower)"/>
+    <rect x="875" y="490" width="190" height="350" fill="url(#winsMid)"/>
+    <!-- Neon sign -->
+    <rect x="888" y="560" width="160" height="46" rx="8" fill="#14101e" stroke="#ff4fa3" stroke-width="4"/>
+    <rect x="888" y="560" width="160" height="46" rx="8" fill="none" stroke="#ff4fa3" stroke-width="10" opacity="0.5" filter="url(#glow)"/>
+    <text x="968" y="593" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="26" fill="#ffd1ea">HOTEL</text>
+    <!-- Shop fronts -->
+    <rect x="560" y="820" width="520" height="60" fill="#0f0e18"/>
+    <rect x="580" y="830" width="200" height="44" fill="#ffcf8a" opacity="0.8"/>
+    <rect x="880" y="830" width="180" height="44" fill="#9fe3ff" opacity="0.7"/>
+  </g>
+
+  <!-- Street and sidewalk -->
+  <rect x="0" y="880" width="1920" height="200" fill="url(#street)"/>
+  <rect x="0" y="872" width="1920" height="14" fill="#4a4652"/>
+  <g fill="#e8e2c8" opacity="0.8">
+    <rect x="60" y="975" width="120" height="8"/><rect x="300" y="975" width="120" height="8"/>
+    <rect x="540" y="975" width="120" height="8"/><rect x="780" y="975" width="120" height="8"/>
+    <rect x="1020" y="975" width="120" height="8"/><rect x="1260" y="975" width="120" height="8"/>
+    <rect x="1500" y="975" width="120" height="8"/><rect x="1740" y="975" width="120" height="8"/>
+  </g>
+
+  <!-- Street lamps with glow -->
+  <g>
+    <rect x="296" y="700" width="8" height="180" fill="#1a1a22"/>
+    <path d="M300 700 Q 300 680 330 680 L 350 680" stroke="#1a1a22" stroke-width="6" fill="none"/>
+    <circle cx="350" cy="690" r="90" fill="url(#lampGlow)"/>
+    <rect x="1496" y="700" width="8" height="180" fill="#1a1a22"/>
+    <path d="M1500 700 Q 1500 680 1470 680 L 1450 680" stroke="#1a1a22" stroke-width="6" fill="none"/>
+    <circle cx="1450" cy="690" r="90" fill="url(#lampGlow)"/>
+  </g>
+
+  <!-- Traffic: cars with head/tail light streaks -->
+  <use href="#car" transform="translate(500 950)" fill="#c0392b"/>
+  <ellipse cx="440" cy="938" rx="40" ry="6" fill="#ff3b3b" opacity="0.8" filter="url(#glow)"/>
+  <use href="#car" transform="translate(1250 1040) scale(-1.15 1.15)" fill="#d8d8de"/>
+  <ellipse cx="1340" cy="1025" rx="70" ry="10" fill="#fff5c8" opacity="0.9" filter="url(#glow)"/>
+  <!-- Tram -->
+  <g transform="translate(1500 950)">
+    <rect x="-180" y="-80" width="360" height="80" rx="14" fill="#e6b422"/>
+    <rect x="-170" y="-70" width="340" height="34" rx="4" fill="#ffeaa0" opacity="0.85"/>
+    <g stroke="#7a5d10" stroke-width="4"><line x1="-90" y1="-70" x2="-90" y2="-36"/><line x1="0" y1="-70" x2="0" y2="-36"/><line x1="90" y1="-70" x2="90" y2="-36"/></g>
+    <rect x="-180" y="-22" width="360" height="8" fill="#b88a12"/>
+    <path d="M0 -80 L -30 -120 L 30 -120" stroke="#222" stroke-width="3" fill="none"/>
+  </g>
+  <line x1="0" y1="826" x2="1920" y2="826" stroke="#111" stroke-width="2" opacity="0.7"/>
+
+  <!-- Modern window frame (dark aluminium) with reflection on the glass -->
+  <path d="M120 80 L560 80 L120 700 Z" fill="#ffffff" opacity="0.05"/>
+  <g>
+    <path fill-rule="evenodd" fill="url(#frame)" d="M0 0 H1920 V1080 H0 Z M70 60 H1850 V990 H70 Z"/>
+    <rect x="945" y="60" width="30" height="930" fill="url(#frame)"/>
+    <rect x="70" y="60" width="1780" height="930" fill="none" stroke="#000" stroke-opacity="0.35" stroke-width="8"/>
+    <rect x="30" y="990" width="1860" height="30" fill="#4a4a52"/>
+    <rect x="30" y="1020" width="1860" height="60" fill="#2b2b31"/>
+  </g>
+</svg>

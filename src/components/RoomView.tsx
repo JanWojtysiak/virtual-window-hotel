@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { mountWindowStage } from '../engine/WindowStage';
+import { sceneFromParam } from '../scenes/views';
 
 export function RoomView() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -7,7 +8,8 @@ export function RoomView() {
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    return mountWindowStage(host);
+    const scene = sceneFromParam(new URLSearchParams(window.location.search).get('room'));
+    return mountWindowStage(host, scene);
   }, []);
 
   return (

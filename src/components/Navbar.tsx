@@ -2,9 +2,8 @@ import { useState } from 'react';
 import { WindowIcon } from './WindowIcon';
 
 const NAV_LINKS = [
-  { label: 'Apartament', href: '?room=apartment' },
-  { label: 'Jak to działa', href: '#jak-to-dziala' },
-  { label: 'Kontakt', href: '#kontakt' },
+  { label: 'Pokoje 2D', href: '#pokoje' },
+  { label: 'Pokoje 3D', href: '#pokoje-3d' },
 ];
 
 export function Navbar() {
@@ -18,7 +17,7 @@ export function Navbar() {
         href="./"
       >
         <WindowIcon className="size-8 text-accent mobile:size-[26px]" />
-        <span>Hotel Widok</span>
+        <span>Wirtualna Rzeczywistość</span>
       </a>
 
       <button
@@ -55,13 +54,6 @@ export function Navbar() {
             </li>
           ))}
         </ul>
-        <a
-          className="inline-flex items-center rounded-full bg-accent px-8 py-3.5 text-[1.125rem] font-bold text-accent-ink transition-[background-color,translate] duration-200 hover:-translate-y-px hover:bg-accent-hover focus-visible:-translate-y-px focus-visible:bg-accent-hover mobile:justify-center"
-          href="#pokoje"
-          onClick={closeMenu}
-        >
-          Zarezerwuj
-        </a>
       </nav>
     </header>
   );
