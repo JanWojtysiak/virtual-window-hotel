@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { mountWindowStage } from '../engine/WindowStage';
-import { sceneFromParam } from '../scenes/views';
+import { mountWindowStage } from '../2d/engine/WindowStage';
+import { sceneFromParam } from '../2d/views';
 
 export function RoomView() {
   const hostRef = useRef<HTMLDivElement>(null);

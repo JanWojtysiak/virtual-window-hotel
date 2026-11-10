@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sceneFromParam } from '../scenes/views';
+import { sceneFromParam } from '../2d/views';
 import { coverScale } from './cover';
 
 describe('coverScale', () => {

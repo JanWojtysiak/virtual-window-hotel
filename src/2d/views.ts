@@ -1,4 +1,4 @@
-import type { SceneId } from './rooms';
+import type { SceneId } from '../scenes/rooms';
 
 export interface SceneView {
   id: SceneId;

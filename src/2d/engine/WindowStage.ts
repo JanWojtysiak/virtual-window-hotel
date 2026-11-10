@@ -1,6 +1,6 @@
 import { Application, Assets, Graphics, Sprite, Texture } from 'pixi.js';
-import type { SceneView } from '../scenes/views';
-import { coverScale } from '../utils/cover';
+import type { SceneView } from '../views';
+import { coverScale } from '../../utils/cover';
 
 /** Background shown behind the picture (and while it loads). */
 const SKY_COLOR = 0x87ceeb;
