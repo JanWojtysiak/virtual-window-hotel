@@ -1,47 +1,71 @@
 import * as ort from 'onnxruntime-web';
+import { depthToNearness, modelInputSize } from './depthMath';
 
 let session: ort.InferenceSession | null = null;
 let loading = false;
 
-const MODEL_URL =
-  'https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model_quantized.onnx';
+// Depth Anything V3 Small (fp32, Apache-2.0). The ONNX export keeps the weights in a
+// separate external-data file next to the small graph file.
+const MODEL_BASE =
+  'https://huggingface.co/onnx-community/depth-anything-v3-small/resolve/main/onnx/';
+const MODEL_GRAPH_FILE = 'model.onnx';
+const MODEL_DATA_FILE = 'model.onnx_data';
 
-const INPUT_WIDTH = 518;
-const INPUT_HEIGHT = 518;
+/** Human-readable info about the model, shown in the UI. */
+export const DEPTH_MODEL_INFO = {
+  name: 'Depth Anything V3 Small',
+  precision: 'fp32 (pełna wersja)',
+  sizeMb: 105,
+} as const;
 
 export type DepthProgressCallback = (progress: number) => void;
+
+/** Downloads a file with byte-level progress reporting. */
+async function fetchWithProgress(
+  url: string,
+  onBytes: (received: number, total: number) => void,
+): Promise<Uint8Array> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.status}`);
+  const total = Number(response.headers.get('content-length') ?? 0);
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    onBytes(received, total);
+  }
+
+  const buffer = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buffer.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return buffer;
+}
 
 export async function loadDepthModel(onProgress?: DepthProgressCallback): Promise<void> {
   if (session || loading) return;
   loading = true;
   try {
     onProgress?.(0);
-    const response = await fetch(MODEL_URL);
-    if (!response.ok) throw new Error(`Failed to fetch model: ${response.status}`);
-    const total = Number(response.headers.get('content-length') ?? 0);
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error('No response body');
-
-    const chunks: Uint8Array[] = [];
-    let received = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      received += value.length;
-      if (total > 0) onProgress?.(received / total);
-    }
-
-    const buffer = new Uint8Array(received);
-    let offset = 0;
-    for (const chunk of chunks) {
-      buffer.set(chunk, offset);
-      offset += chunk.length;
-    }
-
+    // The graph file is tiny (<1 MB); progress is driven by the weights file.
+    const [graph, weights] = await Promise.all([
+      fetchWithProgress(MODEL_BASE + MODEL_GRAPH_FILE, () => {}),
+      fetchWithProgress(MODEL_BASE + MODEL_DATA_FILE, (received, total) => {
+        if (total > 0) onProgress?.(received / total);
+      }),
+    ]);
     onProgress?.(1);
-    session = await ort.InferenceSession.create(buffer.buffer, {
+    session = await ort.InferenceSession.create(graph, {
       executionProviders: ['wasm'],
+      externalData: [{ path: MODEL_DATA_FILE, data: weights }],
     });
   } finally {
     loading = false;
@@ -52,21 +76,22 @@ export function isDepthModelLoaded(): boolean {
   return session !== null;
 }
 
+/**
+ * Estimates depth for every pixel. Returns a 0..1 "nearness" map at the image's
+ * resolution (1 = closest to the camera, 0 = farthest).
+ */
 export async function estimateDepth(image: ImageData): Promise<Float32Array> {
   if (!session) throw new Error('Depth model not loaded. Call loadDepthModel() first.');
 
-  const resized = resizeImageData(image, INPUT_WIDTH, INPUT_HEIGHT);
-  const inputTensor = imageDataToTensor(resized, INPUT_WIDTH, INPUT_HEIGHT);
+  const size = modelInputSize(image.width, image.height);
+  const resized = resizeImageData(image, size.width, size.height);
+  const inputTensor = imageDataToTensor(resized, size.width, size.height);
 
-  const feeds: Record<string, ort.Tensor> = { image: inputTensor };
-  const results = await session.run(feeds);
-
-  const outputKey = session.outputNames[0];
-  const outputTensor = results[outputKey];
-  const depthRaw = outputTensor.data as Float32Array;
-
-  const normalized = normalizeDepth(depthRaw);
-  return resizeDepthMap(normalized, outputTensor.dims as number[], image.width, image.height);
+  const results = await session.run({ [session.inputNames[0]]: inputTensor });
+  // Outputs: predicted_depth, confidence, extrinsics, intrinsics – only depth is used.
+  const outputTensor = results['predicted_depth'] ?? results[session.outputNames[0]];
+  const nearness = depthToNearness(outputTensor.data as Float32Array);
+  return resizeDepthMap(nearness, outputTensor.dims as number[], image.width, image.height);
 }
 
 export function depthToCanvas(
@@ -115,22 +140,8 @@ function imageDataToTensor(image: ImageData, w: number, h: number): ort.Tensor {
     float[w * h + i] = (data[i * 4 + 1] / 255 - mean[1]) / std[1]; // G
     float[2 * w * h + i] = (data[i * 4 + 2] / 255 - mean[2]) / std[2]; // B
   }
-  return new ort.Tensor('float32', float, [1, 3, h, w]);
-}
-
-function normalizeDepth(raw: Float32Array): Float32Array {
-  let min = Infinity;
-  let max = -Infinity;
-  for (let i = 0; i < raw.length; i++) {
-    if (raw[i] < min) min = raw[i];
-    if (raw[i] > max) max = raw[i];
-  }
-  const range = max - min || 1;
-  const out = new Float32Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    out[i] = (raw[i] - min) / range;
-  }
-  return out;
+  // Shape: [batch, views, channels, height, width] – V3 supports multi-view input.
+  return new ort.Tensor('float32', float, [1, 1, 3, h, w]);
 }
 
 function resizeDepthMap(

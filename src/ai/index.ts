@@ -6,5 +6,6 @@ export {
   isDepthModelLoaded,
   estimateDepth,
   depthToCanvas,
+  DEPTH_MODEL_INFO,
   type DepthProgressCallback,
 } from './depth';
