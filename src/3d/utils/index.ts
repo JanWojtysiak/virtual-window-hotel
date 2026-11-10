@@ -1,2 +1,4 @@
 // Three.js helpers: disposal, math, etc.
-export {};
+export * from './depthGrid';
+export * from './depthEdges';
+export * from './reliefLayers';
