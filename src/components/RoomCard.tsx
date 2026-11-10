@@ -15,7 +15,7 @@ export function RoomCard({ room }: { room: RoomPreview }) {
           </h3>
           <p className="text-[1.125rem] font-bold text-accent">
             {formatPrice(room.pricePerNight)}{' '}
-            <span className="text-[0.9rem] font-medium text-text-soft">/ noc</span>
+            <span className="pixel-note text-[0.8rem] font-medium text-text-soft">/ noc</span>
           </p>
         </div>
         <a

@@ -71,7 +71,7 @@ export function DepthRelief({
       {layersPending && (
         <span
           role="status"
-          className="pointer-events-none absolute top-3 right-3 flex items-center gap-2 rounded-full bg-bg-deep/80 px-3 py-1 text-[0.75rem] text-text-soft backdrop-blur"
+          className="pixel-note pointer-events-none absolute top-3 right-3 flex items-center gap-2 rounded-full bg-bg-deep/80 px-3 py-1 text-[0.68rem] text-text-soft backdrop-blur"
         >
           <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
           Przeliczam siatkę 3D…
@@ -80,7 +80,7 @@ export function DepthRelief({
       {contextLost && (
         <div
           role="alert"
-          className="absolute inset-0 flex items-center justify-center bg-bg-deep/85 px-6 text-center text-[0.85rem] text-text-soft"
+          className="pixel-note absolute inset-0 flex items-center justify-center bg-bg-deep/85 px-6 text-center text-[0.75rem] text-text-soft"
         >
           Karta graficzna zresetowała kontekst WebGL – czekam na przywrócenie podglądu 3D…
         </div>

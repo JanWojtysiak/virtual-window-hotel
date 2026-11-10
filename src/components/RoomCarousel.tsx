@@ -15,13 +15,13 @@ const AUTO_ADVANCE_MS = 4500;
 const VERTICAL_QUERY = '(max-width: 820px), (max-height: 600px)';
 
 const SECTION_CLASSES = [
-  '[--gap:28px] [--visible:3] px-(--page-gutter) pt-16 pb-18 max-[1100px]:[--visible:2]',
+  '[--gap:28px] [--visible:3] px-(--page-gutter) pt-16 pb-18 max-[1340px]:[--visible:2]',
   // Vertical mode: a gap bigger than the viewport's vertical padding, so the next card never peeks in.
   'vertical:[--gap:64px] vertical:[--shadow-room:24px] vertical:pt-10 vertical:pb-14',
   // Fill the width, but never get taller than what is left of the screen below the header.
-  'vertical:[--slide-height:clamp(300px,min((100vw_-_2*var(--page-gutter))*1.25,100svh_-_var(--navbar-height)_-_260px),720px)]',
+  'vertical:[--slide-height:clamp(300px,min((100vw_-_var(--main-offset)_-_2*var(--page-gutter))*1.25,100svh_-_var(--navbar-height)_-_260px),720px)]',
   // Wider than tall, but not edge to edge on wide and short (zoomed-in) screens.
-  'vertical:[--card-width:min(100vw_-_2*var(--page-gutter),var(--slide-height)*1.5)]',
+  'vertical:[--card-width:min(100vw_-_var(--main-offset)_-_2*var(--page-gutter),var(--slide-height)*1.5)]',
   // Short screens (zoomed-in desktop, landscape phones): the heading is dropped to give the card room.
   'short:[--slide-height:clamp(240px,100svh_-_var(--navbar-height)_-_140px,720px)] short:pt-6 short:pb-6',
 ].join(' ');
@@ -113,8 +113,8 @@ export function RoomCarousel({ rooms }: { rooms: readonly RoomPreview[] }) {
       <div className="mb-9 flex items-end justify-between gap-6 vertical:mx-auto vertical:mb-6 vertical:max-w-(--card-width) short:mb-3 short:justify-end">
         {/* Visually hidden on short screens, but still announced by screen readers. */}
         <div className="short:sr-only">
-          <p className="mb-2.5 text-[0.85rem] font-bold tracking-[0.2em] text-accent uppercase">
-            Pokoje z widokiem
+          <p className="pixel-note mb-2.5 text-[0.75rem] font-bold tracking-[0.2em] text-accent uppercase">
+            Gotowe pokoje · 2D
           </p>
           <h1 className="font-serif text-[length:clamp(2.25rem,5vw,3.75rem)] leading-[1.05] font-medium text-text">
             Wybierz swoje okno
