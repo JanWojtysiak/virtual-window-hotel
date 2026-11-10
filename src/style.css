@@ -35,7 +35,7 @@
 
   --font-serif: 'Manrope', system-ui, sans-serif;
   --font-sans: 'Manrope', system-ui, sans-serif;
-  --font-pixel: 'Pixelify Sans', system-ui, sans-serif;
+  --font-pixel: 'Oxanium', system-ui, sans-serif;
 
   --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-slide: cubic-bezier(0.65, 0, 0.35, 1);
@@ -206,10 +206,9 @@
   }
 }
 
-/* Small captions only: pixel face, a step smaller, wider gaps between words. */
+/* Tech captions: a HUD face that stays readable at small sizes. */
 @utility pixel-note {
   font-family: var(--font-pixel);
-  word-spacing: 0.4em;
 }
 
 @layer base {
