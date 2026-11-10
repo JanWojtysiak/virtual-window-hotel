@@ -6,3 +6,4 @@ export * from './controls';
 export * from './loaders';
 export * from './utils';
 export * from './workers';
+export * from './physics';

@@ -17,6 +17,7 @@ import {
 } from '../ai';
 import type { DepthMeshSource } from '../3d';
 import { DepthRelief } from './DepthRelief';
+import { WindowView3D } from './WindowView3D';
 import { ErrorBoundary, ErrorCard } from './ErrorBoundary';
 
 type PreviewMode = '2d' | '3d';
@@ -77,6 +78,31 @@ export function AiSection() {
   const [edgeThreshold, setEdgeThreshold] = useState(3);
   const [showEdges, setShowEdges] = useState(false);
 
+  // Until depth is estimated the window shows the photo flat (constant depth).
+  const [flatSource, setFlatSource] = useState<DepthMeshSource | null>(null);
+  const windowSource = depthSource ?? flatSource;
+
+  useEffect(() => {
+    if (!preview) return;
+    let cancelled = false;
+    const img = new Image();
+    img.src = preview;
+    img
+      .decode()
+      .then(() => {
+        if (cancelled) return;
+        const w = 64;
+        const h = Math.max(1, Math.round((w * img.naturalHeight) / img.naturalWidth));
+        setFlatSource({ image: img, depth: new Float32Array(w * h), width: w, height: h });
+      })
+      .catch(() => {
+        if (!cancelled) setFlatSource(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [preview]);
+
   /** Increments on every run / new photo, so late results of an old run are ignored. */
   const depthRunId = useRef(0);
   const depthRunning = depthStatus !== null;
@@ -120,6 +146,7 @@ export function AiSection() {
     setDepthRun(null);
     setDepthUrl(null);
     setDepthSource(null);
+    setFlatSource(null);
     setDescription(null);
     setError(null);
     const reader = new FileReader();
@@ -220,6 +247,30 @@ export function AiSection() {
           />
         </label>
       </div>
+
+      {/* 3D window: every uploaded photo becomes the view outside */}
+      {windowSource && (
+        <article className="mb-10 rounded-2xl border border-border bg-surface/60 px-6 py-7 mobile:px-4">
+          <p className="mb-1 text-[0.8rem] font-bold tracking-[0.18em] text-accent uppercase">3D</p>
+          <h3 className="mb-2 font-serif text-[1.6rem] leading-tight font-medium text-text">
+            Widok przez okno
+          </h3>
+          <p className="mb-6 text-[0.95rem] leading-[1.6] text-text-soft">
+            Zdjęcie stoi za prawdziwym oknem 3D: wnęka w ścianie zasłania część widoku, gdy ruszasz
+            myszką, szyba jest lekko brudna i odbija pokój (mocniej nocą), krople deszczu załamują
+            obraz, a firanka to symulacja tkaniny poruszana wiatrem.
+            {!depthSource && ' Bez mapy głębi widok jest płaski – policz głębię w „AI nr 1”.'}
+          </p>
+          <ErrorBoundary
+            resetKey={windowSource}
+            fallback={(err, reset) => (
+              <ErrorCard title="Widok 3D niedostępny" message={err.message} onRetry={reset} />
+            )}
+          >
+            <WindowView3D source={windowSource} depthScale={depthScale} smoothing={smoothing} />
+          </ErrorBoundary>
+        </article>
+      )}
 
       {/* AI #1 – depth estimation */}
       <article className="mb-10 rounded-2xl border border-border bg-surface/60 px-6 py-7 mobile:px-4">
