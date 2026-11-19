@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Garden layer 0 (sky): sky gradient, sun, and soft clouds. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3f86d4"/>
+      <stop offset="0.55" stop-color="#9ccbf0"/>
+      <stop offset="1" stop-color="#e4f2fa"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fffbe6"/>
+      <stop offset="0.25" stop-color="#fff3c4" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff3c4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1480" cy="200" r="220" fill="url(#sun)"/>
+  <g fill="#ffffff" opacity="0.85" filter="url(#soft)">
+    <ellipse cx="380" cy="190" rx="200" ry="45"/>
+    <ellipse cx="470" cy="160" rx="120" ry="50"/>
+    <ellipse cx="1050" cy="120" rx="240" ry="40"/>
+    <ellipse cx="1140" cy="95" rx="120" ry="40"/>
+    <ellipse cx="1700" cy="320" rx="180" ry="30"/>
+  </g>
+</svg>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Apartment layer 3 (near): rug, sofa, and sleeping cat. -->
+  <defs>
+    <linearGradient id="sofa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4f6f8f"/>
+      <stop offset="1" stop-color="#36506a"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#000" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Rug -->
+  <ellipse cx="900" cy="960" rx="560" ry="90" fill="#b5524a"/>
+  <ellipse cx="900" cy="960" rx="500" ry="70" fill="none" stroke="#e8c79a" stroke-width="6"/>
+
+  <!-- Sofa -->
+  <ellipse cx="760" cy="900" rx="380" ry="30" fill="url(#shadow)"/>
+  <g>
+    <rect x="420" y="700" width="680" height="120" rx="30" fill="url(#sofa)"/>
+    <rect x="400" y="780" width="720" height="110" rx="24" fill="#425f7c"/>
+    <rect x="470" y="770" width="290" height="40" rx="16" fill="#5a7c9c"/>
+    <rect x="760" y="770" width="290" height="40" rx="16" fill="#5a7c9c"/>
+    <rect x="380" y="730" width="70" height="160" rx="28" fill="#3e5a76"/>
+    <rect x="1070" y="730" width="70" height="160" rx="28" fill="#3e5a76"/>
+    <rect x="420" y="888" width="14" height="22" fill="#2b2b2b"/>
+    <rect x="1086" y="888" width="14" height="22" fill="#2b2b2b"/>
+    <rect x="490" y="720" width="90" height="70" rx="18" fill="#e3b34a" transform="rotate(-8 535 755)"/>
+  </g>
+
+  <!-- Cat sleeping on the sofa -->
+  <g transform="translate(900 770)">
+    <ellipse cx="0" cy="0" rx="70" ry="34" fill="#e08a3c"/>
+    <circle cx="58" cy="-10" r="26" fill="#e08a3c"/>
+    <path d="M44 -30 L50 -52 L62 -32 Z M64 -32 L78 -48 L80 -24 Z" fill="#e08a3c"/>
+    <path d="M50 -10 q6 4 12 0 M66 -10 q6 4 12 0" stroke="#5a2d10" stroke-width="2.5" fill="none"/>
+    <path d="M-68 4 C -100 10, -90 36, -40 30" stroke="#e08a3c" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <g stroke="#b8642a" stroke-width="5" opacity="0.7"><path d="M-30 -30 q6 14 0 28"/><path d="M-5 -33 q6 14 0 30"/><path d="M20 -30 q6 14 0 26"/></g>
+  </g>
+</svg>

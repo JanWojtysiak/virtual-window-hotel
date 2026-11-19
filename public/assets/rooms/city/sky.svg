@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- City layer 0 (sky): sky with setting sun and soft clouds. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d2350"/>
+      <stop offset="0.45" stop-color="#7a4a7e"/>
+      <stop offset="0.75" stop-color="#e3826a"/>
+      <stop offset="1" stop-color="#f7c07a"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffe2a6"/>
+      <stop offset="0.3" stop-color="#ffb070" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#ff9060" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="haze"><feGaussianBlur stdDeviation="2.5"/></filter>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="560" cy="560" r="320" fill="url(#sunGlow)"/>
+  <circle cx="560" cy="560" r="48" fill="#ffe7b6"/>
+  <g fill="#f3a0a0" opacity="0.35" filter="url(#haze)">
+    <ellipse cx="1300" cy="250" rx="260" ry="14"/>
+    <ellipse cx="400" cy="320" rx="220" ry="10"/>
+    <ellipse cx="1600" cy="380" rx="200" ry="12"/>
+  </g>
+</svg>
